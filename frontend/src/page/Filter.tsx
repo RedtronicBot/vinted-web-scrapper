@@ -141,7 +141,7 @@ const Filter = () => {
 						</div>
 						<div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2">
 							{filter.products.map((product) => (
-								<Link to={product.url} target="_blank" key={product.id} className="rounded-lg border border-ring overflow-hidden">
+								<Link to={product.url} target="_blank" key={product.id} className="rounded-lg border border-ring overflow-hidden relative">
 									<img
 										src={product.img ?? error_fallback}
 										className="w-full h-40 object-cover"
@@ -157,6 +157,11 @@ const Filter = () => {
 											<Heart />
 										</p>
 									</div>
+									{product.status !== "ACTIVE" && (
+										<div className="absolute top-0 h-full w-full bg-slate-900/50 flex justify-center items-center">
+											<h2 className="text-xl font-bold text-white">{product.status === "SOLD" ? "Vendu" : "Supprimé"}</h2>
+										</div>
+									)}
 								</Link>
 							))}
 						</div>

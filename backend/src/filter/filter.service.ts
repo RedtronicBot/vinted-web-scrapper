@@ -57,6 +57,7 @@ export class FilterService {
             img: true,
             price: true,
             likes: true,
+            status: true,
           },
         },
       },
