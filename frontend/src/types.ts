@@ -1,4 +1,4 @@
-export type Product = {
+export interface Product {
 	id: string
 	url: string
 	status: string
@@ -7,7 +7,7 @@ export type Product = {
 	likes: number
 }
 
-export type Filter = {
+export interface Filter {
 	id: number
 	search: string
 	min_cost: string
@@ -16,12 +16,29 @@ export type Filter = {
 	products: Product[]
 }
 
-export type Brand = {
+export interface Brand {
 	id: number
 	name: string
 }
 
-export type Condition = {
+export interface Condition {
 	id: number
 	name: string
+}
+
+export interface QueryInterface {
+	query: string
+	minPrice: number
+	maxPrice: number
+	brand: number
+	condition: number
+}
+
+export interface FilterDTO {
+	id: number
+	search: string
+	min_cost: number
+	max_cost: number
+	brand_id: number
+	condition_id: number
 }

@@ -1,6 +1,5 @@
 import { createApiClient } from "../hooks/createApiClient"
-import type { BrandInterface, FilterDTO } from "../page/Filter"
-import type { Brand, Condition, Filter } from "../types"
+import type { Brand, Condition, Filter, FilterDTO } from "../types"
 
 const api = createApiClient()
 export const apiService = {
@@ -12,7 +11,7 @@ export const apiService = {
 		const { data } = await api.get("filter/like")
 		return data
 	},
-	createBrand: async (dataBrand: BrandInterface): Promise<Brand> => {
+	createBrand: async (dataBrand: Brand): Promise<Brand> => {
 		const { data } = await api.post("brand", dataBrand)
 		return data
 	},
@@ -22,6 +21,10 @@ export const apiService = {
 	},
 	getConditions: async (): Promise<Condition[]> => {
 		const { data } = await api.get("condition")
+		return data
+	},
+	createCondition: async (dataCondition: Condition): Promise<Condition> => {
+		const { data } = await api.post("condition", dataCondition)
 		return data
 	},
 }
