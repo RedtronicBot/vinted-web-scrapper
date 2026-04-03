@@ -8,12 +8,16 @@ RUN npx prisma generate
 RUN npm run build
 
 # --- STAGE RUN ---
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/prisma.config.ts ./prisma.config.ts
+
+RUN npx playwright install-deps
+RUN npx playwright install
+
 EXPOSE 3000
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
