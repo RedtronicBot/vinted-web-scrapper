@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider     = "prisma-client"
+  output       = "./generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum ProductStatus {
+  ACTIVE
+  SOLD
+  DELETE
+}
+
+model Brand {
+  id      Int      @id
+  name    String
+  filters Filter[]
+}
+
+model Filter {
+  id           Int       @id @default(autoincrement())
+  search       String
+  min_cost     Int
+  max_cost     Int
+  brand_id     Int
+  brand        Brand     @relation(fields: [brand_id], references: [id])
+  condition_id Int
+  condition    Condition @relation(fields: [condition_id], references: [id])
+  products     Product[]
+
+  @@unique([search, min_cost, max_cost, brand_id, condition_id])
+}
+
+model Product {
+  id          Int           @id @default(autoincrement())
+  url         String        @unique
+  status      ProductStatus
+  img         String?
+  price       Decimal
+  likes       Int           @default(0)
+  filter_id   Int
+  filter      Filter        @relation(fields: [filter_id], references: [id])
+  member_id   Int?
+  member      Member?       @relation(fields: [member_id], references: [id])
+  category_id Int?
+  category    Category?     @relation(fields: [category_id], references: [id])
+  sell_at     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Member {
+  id       Int       @id
+  name     String
+  star     Decimal
+  review   Int
+  products Product[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model Condition {
+  id      Int      @id @default(autoincrement())
+  name    String
+  filters Filter[]
+}
