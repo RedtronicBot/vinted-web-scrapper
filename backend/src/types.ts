@@ -8,7 +8,7 @@ export type Product = {
   filter?: {
     id: number
     name?: string
-  } // Optionnel si tu veux inclure les relations
+  }
   member_id: number
   member?: {
     id: number
@@ -22,4 +22,11 @@ export type Product = {
   sell_at: Date
   createdAt: Date
   updatedAt: Date
+}
+
+export type Category = {
+  id: number
+  name: string
+  parent_id: number | null
+  position: number
 }

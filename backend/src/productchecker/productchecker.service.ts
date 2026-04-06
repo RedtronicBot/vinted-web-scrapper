@@ -53,7 +53,7 @@ export class ProductCheckerService {
       try {
         await this.checkProduct(product.url, product.id)
       } catch (err) {
-        this.logger.error(`Erreur sur ${product.url} : ${err.message}`)
+        this.logger.error(`Erreur sur ${product.url} : ${(err as Error).message}`)
       }
 
       if (i < products.length - 1) {

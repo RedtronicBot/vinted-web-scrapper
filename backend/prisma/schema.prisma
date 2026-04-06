@@ -41,21 +41,21 @@ model Filter {
 }
 
 model Product {
-  id          Int           @id @default(autoincrement())
-  url         String        @unique
+  id          Int             @id @default(autoincrement())
+  url         String          @unique
   status      ProductStatus
   img         String?
   price       Decimal
-  likes       Int           @default(0)
+  likes       Int             @default(0)
   filter_id   Int
-  filter      Filter        @relation(fields: [filter_id], references: [id])
+  filter      Filter          @relation(fields: [filter_id], references: [id])
   member_id   Int?
-  member      Member?       @relation(fields: [member_id], references: [id])
+  member      Member?         @relation(fields: [member_id], references: [id])
   category_id Int?
-  category    Category?     @relation(fields: [category_id], references: [id])
+  category    VintedCategory? @relation(fields: [category_id], references: [id])
   sell_at     DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model Member {
@@ -67,9 +67,20 @@ model Member {
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
-  name     String
-  products Product[]
+  id        Int              @id @default(autoincrement())
+  name      String
+  parent_id Int?
+  parent    Category?        @relation("CategoryTree", fields: [parent_id], references: [id])
+  children  Category[]       @relation("CategoryTree")
+  position  Int              @default(0)
+  vinted    VintedCategory[]
+}
+
+model VintedCategory {
+  id          Int       @id
+  category_id Int
+  products    Product[]
+  category    Category  @relation(fields: [category_id], references: [id])
 }
 
 model Condition {

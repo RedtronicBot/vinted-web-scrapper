@@ -27,4 +27,9 @@ export const apiService = {
 		const { data } = await api.post("condition", dataCondition)
 		return data
 	},
+	getCategories: (parentId: number | null) => api.get(`/category${parentId ? `?parent_id=${parentId}` : ""}`).then((r) => r.data),
+
+	createCategory: (data: { name: string; parent_id: number | null; position: number }) => api.post("/category", data).then((r) => r.data),
+
+	createVintedCategory: (data: { id: number; category_id: number }) => api.post("/category/vinted", data).then((r) => r.data),
 }

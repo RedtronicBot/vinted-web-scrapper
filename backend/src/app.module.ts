@@ -8,6 +8,7 @@ import { ProductcheckerModule } from "./productchecker/productchecker.module"
 import { ScheduleModule } from "@nestjs/schedule"
 import { ConditionModule } from './condition/condition.module';
 import { BrandModule } from './brand/brand.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { BrandModule } from './brand/brand.module';
     ProductcheckerModule,
     ConditionModule,
     BrandModule,
+    CategoryModule,
   ],
 })
 export class AppModule {}
