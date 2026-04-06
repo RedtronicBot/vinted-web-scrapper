@@ -49,8 +49,13 @@ export class FilterService {
           },
         },
         products: {
+          where: {
+            status: {
+              in: ["SOLD", "ACTIVE"],
+            },
+          },
           take: 50,
-          orderBy: { likes: "desc" },
+          orderBy: [{ status: "desc" }, { likes: "desc" }],
           select: {
             id: true,
             url: true,

@@ -1,12 +1,11 @@
-import { Body, Controller, Get, Logger, Post } from "@nestjs/common"
+import { Body, Controller, Get, Logger, OnModuleInit, Post } from "@nestjs/common"
 import { FilterService } from "./filter.service"
 import { CreateFilterDto } from "./dto/createFilter.dto"
 import { SearchService } from "src/search/search.service"
-import { Cron, CronExpression } from "@nestjs/schedule"
 import { delay } from "src/utils/delay"
 
 @Controller("filter")
-export class FilterController {
+export class FilterController implements OnModuleInit {
   private readonly logger = new Logger(FilterController.name)
   private isRunning = false
   constructor(
@@ -14,32 +13,34 @@ export class FilterController {
     private readonly searchService: SearchService,
   ) {}
 
-  @Cron("*/5 * * * *")
-  async handleCron() {
-    if (this.isRunning) {
-      this.logger.warn("Previous cron still running, skipping")
-      return
-    }
+  onModuleInit() {
+    this.runLoop()
+  }
+  async runLoop() {
+    while (true) {
+      this.logger.log("Starting scheduled search for all filters")
 
-    this.isRunning = true
-    this.logger.log("Starting scheduled search for all filters")
+      try {
+        const filters = await this.filterService.findAll()
 
-    try {
-      const filters = await this.filterService.findAll()
+        for (const filter of filters) {
+          this.logger.log(`Searching for filter ${filter.id}`)
+          await this.searchService.searchOnce(filter)
 
-      for (const filter of filters) {
-        this.logger.log(`Searching for filter ${filter.id}`)
-        await this.searchService.searchOnce(filter)
-
-        if (filter !== filters[filters.length - 1]) {
           await delay(2 * 60 * 1000)
         }
+
+        this.logger.log("All filters processed, waiting 5 minutes...")
+        await delay(5 * 60 * 1000)
+      } catch (err) {
+        if (err instanceof Error) {
+          this.logger.error(`Loop failed: ${err.message}`)
+        } else {
+          this.logger.error(`Loop failed: ${String(err)}`)
+        }
+
+        await delay(60 * 1000)
       }
-    } catch (err) {
-      this.logger.error("Cron job failed:", err)
-    } finally {
-      this.isRunning = false
-      this.logger.log("Scheduled search complete")
     }
   }
 

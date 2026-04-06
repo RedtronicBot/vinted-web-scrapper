@@ -117,7 +117,7 @@ export class ProductCheckerService {
           likes,
           ...(status === "SOLD" && { sell_at: new Date() }),
           status,
-          ...(image !== null && { image }),
+          ...(image !== null && { img: image }),
         },
       })
 
