@@ -27,4 +27,12 @@ export const apiService = {
 		const { data } = await api.post("condition", dataCondition)
 		return data
 	},
+	getCheckStatus: async () => {
+		const { data } = await api.get("products/check/status")
+		return data
+	},
+	triggerCheck: async () => {
+		const { data } = await api.post("products/check")
+		return data
+	},
 }

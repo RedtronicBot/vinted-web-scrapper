@@ -7,7 +7,6 @@ import { delay } from "src/utils/delay"
 @Controller("filter")
 export class FilterController implements OnModuleInit {
   private readonly logger = new Logger(FilterController.name)
-  private isRunning = false
   constructor(
     private readonly filterService: FilterService,
     private readonly searchService: SearchService,
