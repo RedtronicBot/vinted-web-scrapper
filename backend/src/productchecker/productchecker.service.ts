@@ -53,7 +53,7 @@ export class ProductCheckerService {
       try {
         await this.checkProduct(product.url, product.id)
       } catch (err) {
-        this.logger.error(`Erreur sur ${product.url} : ${err.message}`)
+        this.logger.error(`Erreur sur ${product.url} : ${(err as Error).message}`)
       }
 
       if (i < products.length - 1) {
@@ -117,7 +117,7 @@ export class ProductCheckerService {
           likes,
           ...(status === "SOLD" && { sell_at: new Date() }),
           status,
-          ...(image !== null && { image }),
+          ...(image !== null && { img: image }),
         },
       })
 
