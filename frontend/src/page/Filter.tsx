@@ -12,7 +12,7 @@ const Filter = () => {
 	const { data: filters, isLoading } = useQuery({
 		queryKey: ["filters"],
 		queryFn: apiService.getFilters,
-		refetchInterval: 60 * 1000,
+		refetchInterval: 10 * 1000,
 	})
 	const { data: condition } = useQuery({
 		queryKey: ["condition"],

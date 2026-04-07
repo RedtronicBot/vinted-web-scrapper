@@ -9,25 +9,46 @@ import { delay } from "src/utils/delay"
 export class ProductCheckerService {
   private readonly logger = new Logger(ProductCheckerService.name)
   private isRunning = false
+  private lastRun: { startedAt: Date; finishedAt?: Date; error?: string } | null = null
   constructor(
     private readonly prisma: PrismaService,
     private readonly browserService: BrowserService,
   ) {}
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async handleDailyCheck() {
+  async triggerManualCheck() {
     if (this.isRunning) {
-      this.logger.warn("Check déjà en cours")
-      return
+      return { status: "already_running", startedAt: this.lastRun?.startedAt }
     }
+    this.runCheck()
 
+    return { status: "started", startedAt: this.lastRun?.startedAt }
+  }
+
+  getStatus() {
+    return {
+      isRunning: this.isRunning,
+      lastRun: this.lastRun,
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async handleDailyCheck() {
+    await this.triggerManualCheck()
+  }
+
+  private async runCheck() {
+    if (this.isRunning) return
     this.isRunning = true
-    this.logger.log("Début du check quotidien des produits...")
-
+    this.lastRun = { startedAt: new Date() }
+    this.logger.log("Début du check...")
     try {
       await this.checkAllProducts()
+      this.lastRun.finishedAt = new Date()
+    } catch (err) {
+      this.lastRun.error = (err as Error).message
+      this.logger.error("Erreur lors du check", err)
     } finally {
       this.isRunning = false
-      this.logger.log("Check quotidien terminé.")
     }
   }
 

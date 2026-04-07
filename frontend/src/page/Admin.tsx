@@ -42,7 +42,6 @@ const Admin = () => {
 		resetCondition()
 	}
 	const [stack, setStack] = useState<BreadcrumbItem[]>([])
-	console.log("🚀 ~ Admin ~ stack:", stack)
 	const currentId = stack.length > 0 ? stack[stack.length - 1].id : null
 
 	const [showAddCategory, setShowAddCategory] = useState(false)
@@ -103,10 +102,31 @@ const Admin = () => {
 		setShowAddCategory(false)
 		setShowAddVinted(false)
 	}
+	const { data: status } = useQuery({
+		queryKey: ["check-status"],
+		queryFn: apiService.getCheckStatus,
+		refetchInterval: (query) => (query.state.data?.isRunning ? 5000 : false),
+	})
+	const { mutate: triggerCheck, isPending } = useMutation({
+		mutationFn: apiService.triggerCheck,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["check-status"] })
+		},
+	})
 	return (
 		<div className="w-full min-h-dvh bg-background flex flex-col items-center py-10 px-6 md:px-10">
 			<h1 className="text-4xl font-black text-white tracking-tight mb-10">Admin</h1>
 			<div className="flex flex-col gap-4">
+				<div className="flex gap-2">
+					<button
+						onClick={() => triggerCheck()}
+						className="text-white font-bold rounded-lg px-8 py-3 bg-primary cursor-pointer"
+						disabled={isPending || status?.isRunning}
+					>
+						{status?.isRunning ? "Check en cours..." : "Lancer le check"}
+					</button>
+					{status?.lastRun && <p className="text-white">Dernier check : {new Date(status.lastRun.finishedAt).toLocaleString()}</p>}
+				</div>
 				<div className="flex flex-col bg-secondary rounded-lg border border-ring p-4">
 					<p className="text-white text-lg font-bold">Ajouter une marque</p>
 					<form onSubmit={handleSubmitBrand(onSubmitBrand)} className="flex items-end gap-2">

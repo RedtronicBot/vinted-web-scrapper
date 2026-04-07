@@ -27,9 +27,26 @@ export const apiService = {
 		const { data } = await api.post("condition", dataCondition)
 		return data
 	},
-	getCategories: (parentId: number | null) => api.get(`/category${parentId ? `?parent_id=${parentId}` : ""}`).then((r) => r.data),
+	getCategories: async (parentId: number | null) => {
+		const { data } = await api.get(`category${parentId ? `?parent_id=${parentId}` : ""}`)
+		return data
+	},
 
-	createCategory: (data: { name: string; parent_id: number | null; position: number }) => api.post("/category", data).then((r) => r.data),
+	createCategory: async (dataCategory: { name: string; parent_id: number | null; position: number }) => {
+		const { data } = await api.post("category", dataCategory)
+		return data
+	},
 
-	createVintedCategory: (data: { id: number; category_id: number }) => api.post("/category/vinted", data).then((r) => r.data),
+	createVintedCategory: async (dataVintedCategory: { id: number; category_id: number }) => {
+		const { data } = await api.post("category/vinted", dataVintedCategory)
+		return data
+	},
+	getCheckStatus: async () => {
+		const { data } = await api.get("products/check/status")
+		return data
+	},
+	triggerCheck: async () => {
+		const { data } = await api.post("products/check")
+		return data
+	},
 }
