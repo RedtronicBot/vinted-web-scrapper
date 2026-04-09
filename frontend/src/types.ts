@@ -1,18 +1,24 @@
 export interface Product {
-	id: string
+	id: number
 	url: string
-	status: string
-	img: string
+	status: "ACTIVE" | "SOLD" | "DELETE"
+	img: string | null
 	price: string
 	likes: number
+	category: VintedCategory | null
 }
 
 export interface Filter {
 	id: number
 	search: string
-	min_cost: string
-	max_cost: string
+	min_cost: number
+	max_cost: number
 	brand: Brand | null
+	category: {
+		category: {
+			name: string
+		}
+	} | null
 	products: Product[]
 }
 
@@ -73,4 +79,8 @@ export interface CategoryFormValues {
 
 export interface VintedFormValues {
 	vinted_id: number
+}
+
+export interface VintedCategory {
+	category: Category
 }

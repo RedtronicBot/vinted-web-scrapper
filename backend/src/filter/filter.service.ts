@@ -52,6 +52,15 @@ export class FilterService {
             name: true,
           },
         },
+        category: {
+          select: {
+            category: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
         products: {
           where: {
             status: {
@@ -72,6 +81,7 @@ export class FilterService {
       },
     })
   }
+
   delete(id: number) {
     return this.prisma.filter.delete({ where: { id } })
   }

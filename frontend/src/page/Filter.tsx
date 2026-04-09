@@ -261,11 +261,12 @@ const Filter = () => {
 					<div key={filter.id} className="flex flex-col bg-secondary rounded-lg border border-ring p-4 mb-6">
 						<div className="flex justify-between">
 							<div className="flex gap-2">
-								<p className="text-white text-lg">{filter.search}</p>
+								{filter.search !== "" && <p className="text-white text-lg">{filter.search}</p>}
 								<p className="text-white text-lg">
-									prix : entre {filter.min_cost} € et {filter.max_cost}
+									prix : entre {filter.min_cost} € et {filter.max_cost} €
 								</p>
-								<p className="text-white text-lg">Marque : {filter.brand?.name}</p>
+								{filter.brand?.name && <p className="text-white text-lg">Marque : {filter.brand?.name}</p>}
+								{filter.category?.category.name && <p className="text-white text-lg">Catégorie : {filter.category?.category.name}</p>}
 							</div>
 							<Trash className="text-white user-none cursor-pointer" onClick={() => deleteFilterMutation.mutate(filter.id)} />
 						</div>
