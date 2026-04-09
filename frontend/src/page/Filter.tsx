@@ -112,7 +112,7 @@ const Filter = () => {
 								<ChevronDown />
 							</div>
 							<div
-								className={`${openCategory ? "" : "hidden"} bg-form w-40 absolute top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
+								className={`${openCategory ? "" : "hidden"} bg-form w-40 absolute z-10 top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
 								ref={categoryModalRef}
 							>
 								{stack.length > 0 && (
@@ -172,7 +172,7 @@ const Filter = () => {
 								<ChevronDown />
 							</div>
 							<div
-								className={`${openPrice ? "" : "hidden"} bg-form w-fit absolute top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex p-4 gap-4`}
+								className={`${openPrice ? "" : "hidden"} bg-form w-fit absolute z-10 top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex p-4 gap-4`}
 								ref={priceModalRef}
 							>
 								<div className="flex flex-col gap-1">
@@ -208,7 +208,7 @@ const Filter = () => {
 								<ChevronDown />
 							</div>
 							<div
-								className={`${openBrand ? "" : "hidden"} bg-form w-max absolute top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
+								className={`${openBrand ? "" : "hidden"} bg-form w-max absolute z-10 top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
 								ref={brandModalRef}
 							>
 								{brand?.map((brands) => (
@@ -233,7 +233,7 @@ const Filter = () => {
 								<ChevronDown />
 							</div>
 							<div
-								className={`${openState ? "" : "hidden"} bg-form w-max absolute top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
+								className={`${openState ? "" : "hidden"} bg-form w-max absolute z-10 top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
 								ref={stateModalRef}
 							>
 								{condition?.map((conditions) => (
