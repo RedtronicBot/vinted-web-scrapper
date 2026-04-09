@@ -53,6 +53,9 @@ export class ProductCheckerService {
   }
 
   private async checkAllProducts() {
+    await this.prisma.product.deleteMany({
+      where: { status: "DELETE" },
+    })
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
     const products = await this.prisma.product.findMany({
       where: {

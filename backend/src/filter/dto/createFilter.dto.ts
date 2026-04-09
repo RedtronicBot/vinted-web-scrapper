@@ -19,4 +19,7 @@ export class CreateFilterDto {
 
   @IsInt()
   condition_id: number
+
+  @IsInt()
+  category_id: number
 }

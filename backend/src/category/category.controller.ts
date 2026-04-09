@@ -5,13 +5,6 @@ import { CategoryService } from "./category.service"
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  // GET /categories?parent_id=10  (ou sans param pour les racines)
-  @Get()
-  getChildren(@Query("parent_id") parentId?: string) {
-    const id = parentId ? parseInt(parentId) : null
-    return this.categoryService.getChildren(id)
-  }
-
   // GET /categories/tree  (arbre complet pour pré-chargement)
   @Get("tree")
   getFullTree() {

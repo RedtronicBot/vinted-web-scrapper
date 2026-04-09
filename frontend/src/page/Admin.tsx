@@ -1,30 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { apiService } from "../services/apiService"
-import type { Brand, Condition } from "../types"
+import type { Brand, Category, CategoryFormValues, Condition, RootNode, StackItem, VintedFormValues } from "../types"
 import { useState } from "react"
-interface Category {
-	id: number
-	name: string
-	position: number
-	_count: { children: number; vinted: number }
-}
-
-interface BreadcrumbItem {
-	id: number
-	name: string
-}
-
-interface AddCategoryForm {
-	name: string
-}
-
-interface AddVintedForm {
-	vinted_id: number
-}
+import { ArrowLeft, ChevronRight } from "lucide-react"
+import { findNode } from "../helpers/findnode"
 
 const Admin = () => {
 	const queryClient = useQueryClient()
+
+	const [stack, setStack] = useState<StackItem[]>([])
+	const [showAddCategory, setShowAddCategory] = useState(false)
+	const [showAddVinted, setShowAddVinted] = useState(false)
+	const currentId = stack.length > 0 ? stack[stack.length - 1].id : null
 	const createBrandMutation = useMutation({
 		mutationFn: apiService.createBrand,
 	})
@@ -41,67 +29,11 @@ const Admin = () => {
 		await createConditionMutation.mutateAsync(data)
 		resetCondition()
 	}
-	const [stack, setStack] = useState<BreadcrumbItem[]>([])
-	const currentId = stack.length > 0 ? stack[stack.length - 1].id : null
-
-	const [showAddCategory, setShowAddCategory] = useState(false)
-	const [showAddVinted, setShowAddVinted] = useState(false)
-
-	// Récupère les enfants du nœud courant
-	const { data: categories, isLoading } = useQuery<Category[]>({
-		queryKey: ["categories", currentId],
-		queryFn: () => apiService.getCategories(currentId),
+	const { data: tree, isLoading } = useQuery<Category[]>({
+		queryKey: ["categories-tree"],
+		queryFn: apiService.getFullTree,
+		staleTime: Infinity,
 	})
-	console.log("🚀 ~ Admin ~ categories:", categories)
-
-	const { register: regCat, handleSubmit: handleCat, reset: resetCat } = useForm<AddCategoryForm>()
-	const { register: regVinted, handleSubmit: handleVinted, reset: resetVinted } = useForm<AddVintedForm>()
-
-	const createCategoryMutation = useMutation({
-		mutationFn: (data: AddCategoryForm) =>
-			apiService.createCategory({
-				name: data.name,
-				parent_id: currentId,
-				position: categories?.length ?? 0,
-			}),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["categories", currentId] })
-			setShowAddCategory(false)
-			resetCat()
-		},
-	})
-
-	const createVintedMutation = useMutation({
-		mutationFn: (data: AddVintedForm) =>
-			apiService.createVintedCategory({
-				id: Number(data.vinted_id),
-				category_id: currentId!,
-			}),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["categories", currentId] })
-			setShowAddVinted(false)
-			resetVinted()
-		},
-	})
-	const onSubmitCategory: SubmitHandler<AddCategoryForm> = async (data) => {
-		await createCategoryMutation.mutateAsync(data)
-	}
-
-	const onSubmitVinted: SubmitHandler<AddVintedForm> = async (data) => {
-		await createVintedMutation.mutateAsync(data)
-	}
-
-	const navigateTo = (item: BreadcrumbItem) => {
-		setStack((prev) => [...prev, item])
-		setShowAddCategory(false)
-		setShowAddVinted(false)
-	}
-
-	const navigateToBreadcrumb = (index: number) => {
-		setStack((prev) => prev.slice(0, index))
-		setShowAddCategory(false)
-		setShowAddVinted(false)
-	}
 	const { data: status } = useQuery({
 		queryKey: ["check-status"],
 		queryFn: apiService.getCheckStatus,
@@ -113,6 +45,48 @@ const Admin = () => {
 			queryClient.invalidateQueries({ queryKey: ["check-status"] })
 		},
 	})
+	const currentNode: RootNode | Category | null = stack.length === 0 ? { children: tree ?? [] } : findNode(tree ?? [], stack[stack.length - 1].id)
+
+	const { register: regCat, handleSubmit: handleCat, reset: resetCat } = useForm<CategoryFormValues>()
+
+	const { register: regVinted, handleSubmit: handleVinted, reset: resetVinted } = useForm<VintedFormValues>()
+
+	const createCategoryMutation = useMutation({
+		mutationFn: (data: { name: string; parent_id: number | null; position: number }) => apiService.createCategory(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["categories-tree"] })
+			setShowAddCategory(false)
+			resetCat()
+		},
+	})
+
+	const createVintedMutation = useMutation({
+		mutationFn: (data: { id: number; category_id: number }) => apiService.createVintedCategory(data),
+		onSuccess: () => {
+			setShowAddVinted(false)
+			resetVinted()
+		},
+	})
+
+	const navigateTo = (item: StackItem): void => {
+		setStack((prev) => [...prev, item])
+	}
+
+	const onSubmitCategory = (values: CategoryFormValues): void => {
+		createCategoryMutation.mutate({
+			name: values.name,
+			parent_id: currentId,
+			position: currentNode?.children.length ?? 0,
+		})
+	}
+
+	const onSubmitVinted = (values: VintedFormValues): void => {
+		if (!currentId) return
+		createVintedMutation.mutate({
+			id: Number(values.vinted_id),
+			category_id: currentId,
+		})
+	}
 	return (
 		<div className="w-full min-h-dvh bg-background flex flex-col items-center py-10 px-6 md:px-10">
 			<h1 className="text-4xl font-black text-white tracking-tight mb-10">Admin</h1>
@@ -173,60 +147,55 @@ const Admin = () => {
 				</div>
 				<div className="flex flex-col gap-2 bg-secondary rounded-lg border border-ring p-4">
 					<p className="text-white text-lg font-bold">Ajouter une catégorie</p>
-
-					{/* BREADCRUMB */}
-					<div className="flex items-center gap-2 flex-wrap">
-						<button onClick={() => navigateToBreadcrumb(0)} className="text-[#92adc9] hover:text-white transition-colors text-sm">
-							Racine
-						</button>
-						{stack.map((item, i) => (
-							<span key={item.id} className="flex items-center gap-2">
-								<span className="text-[#92adc9]">/</span>
-								<button
-									onClick={() => navigateToBreadcrumb(i + 1)}
-									className={`text-sm transition-colors ${i === stack.length - 1 ? "text-white font-semibold" : "text-[#92adc9] hover:text-white"}`}
-								>
-									{item.name}
-								</button>
-							</span>
-						))}
-					</div>
-
-					{/* LISTE DES ENFANTS */}
+					{/* Breadcrumb */}
+					{stack.length > 0 && (
+						<div className="flex items-center gap-2">
+							<button onClick={() => setStack((prev) => prev.slice(0, -1))}>
+								<ArrowLeft className="text-white" />
+							</button>
+							<span className="text-gray-400 text-sm">{stack[stack.length - 1].name}</span>
+						</div>
+					)}
+					{/* List */}
 					<div className="space-y-2">
 						{isLoading ? (
-							<p className="text-[#92adc9]">Chargement...</p>
-						) : categories?.length === 0 ? (
-							<p className="text-[#92adc9] text-sm">Aucune sous-catégorie.</p>
+							<p className="text-white">Chargement...</p>
+						) : !currentNode || currentNode.children.length === 0 ? (
+							<p className="text-white">Aucune sous-catégorie</p>
 						) : (
-							categories?.map((cat) => (
-								<button
-									key={cat.id}
-									onClick={() => navigateTo({ id: cat.id, name: cat.name })}
-									className="w-full flex items-center justify-between bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-5 py-4 transition-colors group"
-								>
-									<div className="flex items-center gap-3">
-										<span className="text-white font-semibold">{cat.name}</span>
-										{cat._count.vinted > 0 && (
-											<span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">{cat._count.vinted} Vinted ID</span>
-										)}
-									</div>
-									<div className="flex items-center gap-3">
-										{cat._count.children > 0 && (
-											<span className="text-xs text-[#92adc9]">
-												{cat._count.children} sous-catégorie{cat._count.children > 1 ? "s" : ""}
+							currentNode.children.map((cat: Category) => {
+								const isLeaf = !!cat.vinted
+								return (
+									<div
+										key={cat.id}
+										className="flex justify-between bg-gray-700 p-3 rounded cursor-pointer items-center"
+										onClick={() => {
+											if (isLeaf) {
+												console.log("Produit sélectionné", cat)
+												return
+											}
+											if (!isLeaf) navigateTo({ id: cat.id, name: cat.name })
+										}}
+									>
+										<span className="text-white">{cat.name}</span>
+										{!isLeaf && cat.children.length > 0 ? (
+											<span>
+												<ChevronRight className="text-white" />
 											</span>
+										) : (
+											<div className="w-fit h-fit rounded-full p-0.5 border-2 border-gray-500">
+												<div className={`${isLeaf ? "bg-green-500" : "bg-gray-700"} h-2.5 w-2.5 rounded-full`}></div>
+											</div>
 										)}
-										<span className="text-[#92adc9] group-hover:text-white transition-colors">›</span>
 									</div>
-								</button>
-							))
+								)
+							})
 						)}
 					</div>
 
-					{/* ACTIONS */}
-					{/* Ajouter une catégorie — toujours disponible */}
-					<div className="space-y-3">
+					{/* Actions */}
+					<div className="flex gap-2">
+						{/* Ajouter une catégorie */}
 						{!showAddCategory ? (
 							<button
 								onClick={() => {
@@ -235,7 +204,7 @@ const Admin = () => {
 								}}
 								className="text-white font-bold rounded-lg px-6 py-3 bg-primary cursor-pointer"
 							>
-								+ Ajouter une catégorie
+								Ajouter une catégorie
 							</button>
 						) : (
 							<form onSubmit={handleCat(onSubmitCategory)} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-5 py-4">
@@ -276,7 +245,7 @@ const Admin = () => {
 										}}
 										className="text-white font-bold rounded-lg px-6 py-3 bg-white/10 border border-white/10 cursor-pointer hover:bg-white/20 transition-colors"
 									>
-										+ Ajouter un type de produit Vinted
+										Ajouter un type de produit Vinted
 									</button>
 								) : (
 									<form

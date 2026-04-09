@@ -11,6 +11,9 @@ export const apiService = {
 		const { data } = await api.get("filter/like")
 		return data
 	},
+	deleteFilter: async (id: number): Promise<void> => {
+		await api.delete(`filter/${id}`)
+	},
 	createBrand: async (dataBrand: Brand): Promise<Brand> => {
 		const { data } = await api.post("brand", dataBrand)
 		return data
@@ -29,6 +32,10 @@ export const apiService = {
 	},
 	getCategories: async (parentId: number | null) => {
 		const { data } = await api.get(`category${parentId ? `?parent_id=${parentId}` : ""}`)
+		return data
+	},
+	getFullTree: async () => {
+		const { data } = await api.get("category/tree")
 		return data
 	},
 

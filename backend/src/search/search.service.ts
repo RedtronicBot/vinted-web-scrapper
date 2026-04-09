@@ -15,7 +15,6 @@ export class SearchService {
     const baseUrl = "https://www.vinted.fr/catalog"
 
     const url = new URL(baseUrl)
-
     url.searchParams.set("search_text", filter.search)
     url.searchParams.set("order", "newest_first")
     url.searchParams.set("page", "1")
@@ -27,6 +26,9 @@ export class SearchService {
     }
     if (filter.condition_id && filter.condition_id > 0) {
       url.searchParams.append("status_ids[]", String(filter.condition_id))
+    }
+    if (filter.category_id && filter.category_id > 0) {
+      url.searchParams.append("catalog[]", String(filter.category_id))
     }
     const product = await this.collectCatalog(url, filter)
 
@@ -50,7 +52,6 @@ export class SearchService {
           get: () => undefined,
         })
       })
-
       const response = await page.goto(url.toString(), { waitUntil: "domcontentloaded" })
       if (!response || !response.ok()) {
         throw new Error(`Navigation échouée : ${response?.status()}`)

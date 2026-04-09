@@ -6,26 +6,13 @@ import { Category } from "src/types"
 export class CategoryService {
   constructor(private prisma: PrismaService) {}
 
-  // Récupère les enfants directs d'un parent (ou les racines si null)
-  async getChildren(parentId: number | null) {
-    return this.prisma.category.findMany({
-      where: { parent_id: parentId ?? null },
-      orderBy: { position: "asc" },
-      select: {
-        id: true,
-        name: true,
-        position: true,
-        // Indique s'il y a des enfants sans les charger
-        _count: { select: { children: true } },
-      },
-    })
-  }
-
   // Récupère tout l'arbre en une requête (pour pré-chargement complet)
   async getFullTree() {
     const all = await this.prisma.category.findMany({
       orderBy: { position: "asc" },
-      select: { id: true, name: true, parent_id: true, position: true },
+      include: {
+        vinted: true,
+      },
     })
     return this.buildTree(all)
   }

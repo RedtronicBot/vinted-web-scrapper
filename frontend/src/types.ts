@@ -12,7 +12,7 @@ export interface Filter {
 	search: string
 	min_cost: string
 	max_cost: string
-	brand: Brand
+	brand: Brand | null
 	products: Product[]
 }
 
@@ -32,6 +32,7 @@ export interface QueryInterface {
 	maxPrice: number
 	brand: number
 	condition: number
+	category: number
 }
 
 export interface FilterDTO {
@@ -41,4 +42,35 @@ export interface FilterDTO {
 	max_cost: number
 	brand_id: number
 	condition_id: number
+	category_id: number
+}
+
+export interface CategoryVinted {
+	name: string
+	parent_id: number | null
+	position: number
+}
+
+export interface StackItem {
+	id: number
+	name: string
+}
+
+export interface Category {
+	id: number
+	name: string
+	children: Category[]
+	vinted: { id: number }
+}
+
+export interface RootNode {
+	children: Category[]
+}
+
+export interface CategoryFormValues {
+	name: string
+}
+
+export interface VintedFormValues {
+	vinted_id: number
 }

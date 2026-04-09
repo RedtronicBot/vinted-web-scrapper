@@ -27,15 +27,17 @@ model Brand {
 }
 
 model Filter {
-  id           Int       @id @default(autoincrement())
+  id           Int             @id @default(autoincrement())
   search       String
   min_cost     Int
   max_cost     Int
-  brand_id     Int
-  brand        Brand     @relation(fields: [brand_id], references: [id])
-  condition_id Int
-  condition    Condition @relation(fields: [condition_id], references: [id])
+  brand_id     Int?
+  brand        Brand?          @relation(fields: [brand_id], references: [id])
+  condition_id Int?
+  condition    Condition?      @relation(fields: [condition_id], references: [id])
   products     Product[]
+  category_id  Int?
+  category     VintedCategory? @relation(fields: [category_id], references: [id])
 
   @@unique([search, min_cost, max_cost, brand_id, condition_id])
 }
@@ -48,7 +50,7 @@ model Product {
   price       Decimal
   likes       Int             @default(0)
   filter_id   Int
-  filter      Filter          @relation(fields: [filter_id], references: [id])
+  filter      Filter          @relation(fields: [filter_id], references: [id], onDelete: Cascade)
   member_id   Int?
   member      Member?         @relation(fields: [member_id], references: [id])
   category_id Int?
@@ -67,20 +69,21 @@ model Member {
 }
 
 model Category {
-  id        Int              @id @default(autoincrement())
+  id        Int             @id @default(autoincrement())
   name      String
   parent_id Int?
-  parent    Category?        @relation("CategoryTree", fields: [parent_id], references: [id])
-  children  Category[]       @relation("CategoryTree")
-  position  Int              @default(0)
-  vinted    VintedCategory[]
+  parent    Category?       @relation("CategoryTree", fields: [parent_id], references: [id])
+  children  Category[]      @relation("CategoryTree")
+  position  Int             @default(0)
+  vinted    VintedCategory?
 }
 
 model VintedCategory {
   id          Int       @id
-  category_id Int
+  category_id Int       @unique
   products    Product[]
   category    Category  @relation(fields: [category_id], references: [id])
+  filters     Filter[]
 }
 
 model Condition {

@@ -5,25 +5,29 @@ import { CreateFilterDto } from "./dto/createFilter.dto"
 @Injectable()
 export class FilterService {
   constructor(private readonly prisma: PrismaService) {}
-  create(dto: CreateFilterDto) {
-    const { search, min_cost, max_cost, brand_id, condition_id } = dto
-    return this.prisma.filter.upsert({
+  async create(dto: CreateFilterDto) {
+    const { search, min_cost, max_cost, brand_id, condition_id, category_id } = dto
+    const existing = await this.prisma.filter.findFirst({
       where: {
-        search_min_cost_max_cost_brand_id_condition_id: {
-          search: search,
-          min_cost: Number(min_cost ?? 0),
-          max_cost: Number(max_cost ?? 999999),
-          brand_id: Number(brand_id ?? 0),
-          condition_id: Number(condition_id ?? 0),
-        },
+        search,
+        min_cost: min_cost ?? 0,
+        max_cost: max_cost ?? 999999,
+        brand_id,
+        condition_id,
+        category_id,
       },
-      update: {},
-      create: {
-        search: search,
-        min_cost: Number(min_cost ?? 0),
-        max_cost: Number(max_cost ?? 999999),
-        brand_id: Number(brand_id ?? 0),
-        condition_id: Number(condition_id ?? 0),
+    })
+
+    if (existing) return existing
+
+    return this.prisma.filter.create({
+      data: {
+        search,
+        min_cost: min_cost ?? 0,
+        max_cost: max_cost ?? 999999,
+        brand_id,
+        condition_id,
+        category_id,
       },
     })
   }
@@ -67,5 +71,8 @@ export class FilterService {
         },
       },
     })
+  }
+  delete(id: number) {
+    return this.prisma.filter.delete({ where: { id } })
   }
 }

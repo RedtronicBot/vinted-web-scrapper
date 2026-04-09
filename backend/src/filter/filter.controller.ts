@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Logger, OnModuleInit, Post } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Logger, OnModuleInit, Param, ParseIntPipe, Post } from "@nestjs/common"
 import { FilterService } from "./filter.service"
 import { CreateFilterDto } from "./dto/createFilter.dto"
 import { SearchService } from "src/search/search.service"
@@ -57,5 +57,10 @@ export class FilterController implements OnModuleInit {
     })
 
     return filter
+  }
+
+  @Delete(":id")
+  delete(@Param("id", ParseIntPipe) id: number) {
+    return this.filterService.delete(id)
   }
 }
