@@ -4,6 +4,7 @@ import { ProductStatus } from "prisma/generated/prisma/enums"
 import { PrismaService } from "prisma/prisma.service"
 import { BrowserService } from "src/browser/browser.service"
 import { delay } from "src/utils/delay"
+import { isOlderThanOneWeek } from "src/utils/isOlderThanOneWeek"
 
 @Injectable()
 export class ProductCheckerService {
@@ -128,6 +129,16 @@ export class ProductCheckerService {
       let status: ProductStatus = "ACTIVE"
       if ((await soldLocator.count()) > 0) {
         status = "SOLD"
+      }
+      const uploadDateLocator = page.locator('[data-testid="item-attributes-upload_date"] [itemprop="upload_date"] span')
+      if ((await uploadDateLocator.count()) > 0) {
+        const uploadText = await uploadDateLocator.first().textContent()
+        if (uploadText && status !== "SOLD") {
+          const isOld = isOlderThanOneWeek(uploadText.trim())
+          if (isOld) {
+            status = "ARCHIVED"
+          }
+        }
       }
       let image: string | null = null
       const imageLocator = page.locator('[data-testid="item-photo-1--img"]')
