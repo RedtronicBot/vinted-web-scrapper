@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronDown, ChevronRight, Heart, Search, Trash } from "lucide-react"
+import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight, Heart, Search, Trash } from "lucide-react"
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { apiService } from "../services/apiService"
@@ -8,6 +8,7 @@ import { Link } from "react-router"
 import { useRef, useState } from "react"
 import { findNode } from "../helpers/findnode"
 import { useClickOutside } from "../hooks/useClickOutside"
+import { formatNumber } from "../utils/formatNumber"
 
 const Filter = () => {
 	const [stack, setStack] = useState<StackItem[]>([])
@@ -78,6 +79,15 @@ const Filter = () => {
 		mutationFn: (id: number) => apiService.deleteFilter(id),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["filters"] }),
 	})
+	const ITEMS_PER_PAGE = 56
+
+	const [currentPages, setCurrentPages] = useState<Record<number, number>>({})
+
+	const getCurrentPage = (filterId: number) => currentPages[filterId] ?? 1
+
+	const setPage = (filterId: number, page: number) => {
+		setCurrentPages((prev) => ({ ...prev, [filterId]: page }))
+	}
 	return (
 		<div className="w-full min-h-dvh bg-background flex flex-col items-center py-10 px-6 md:px-10">
 			<div className="w-full max-w-8xl">
@@ -257,47 +267,77 @@ const Filter = () => {
 
 				{/* LISTE DES FILTRES */}
 				<div className="flex flex-col gap-6">{isLoading && <p className="text-[#92adc9]">Chargement...</p>}</div>
-				{filters?.map((filter) => (
-					<div key={filter.id} className="flex flex-col bg-secondary rounded-lg border border-ring p-4 mb-6">
-						<div className="flex justify-between">
-							<div className="flex gap-2">
-								{filter.search !== "" && <p className="text-white text-lg">{filter.search}</p>}
-								<p className="text-white text-lg">
-									prix : entre {filter.min_cost} € et {filter.max_cost} €
-								</p>
-								{filter.brand?.name && <p className="text-white text-lg">Marque : {filter.brand?.name}</p>}
-								{filter.category?.category.name && <p className="text-white text-lg">Catégorie : {filter.category?.category.name}</p>}
+				{filters?.map((filter) => {
+					const currentPage = getCurrentPage(filter.id)
+					const totalPages = Math.ceil(filter.products.length / ITEMS_PER_PAGE)
+					const paginatedProducts = filter.products.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+
+					return (
+						<div key={filter.id} className="flex flex-col bg-secondary rounded-lg border border-ring p-4 mb-6">
+							<div className="flex justify-between">
+								<div className="flex gap-2">
+									{filter.search !== "" && <p className="text-white text-lg">{filter.search}</p>}
+									<p className="text-white text-lg">
+										prix : entre {filter.min_cost} € et {filter.max_cost} €
+									</p>
+									{filter.brand?.name && <p className="text-white text-lg">Marque : {filter.brand?.name}</p>}
+									{filter.category?.category.name && <p className="text-white text-lg">Catégorie : {filter.category?.category.name}</p>}
+								</div>
+								<Trash className="text-white user-none cursor-pointer" onClick={() => deleteFilterMutation.mutate(filter.id)} />
 							</div>
-							<Trash className="text-white user-none cursor-pointer" onClick={() => deleteFilterMutation.mutate(filter.id)} />
-						</div>
-						<div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2">
-							{filter.products.map((product) => (
-								<Link to={product.url} target="_blank" key={product.id} className="rounded-lg border border-ring overflow-hidden relative">
-									<img
-										src={product.img ?? error_fallback}
-										className="w-full h-40 object-cover"
-										onError={(e) => {
-											e.currentTarget.src = error_fallback
-											e.currentTarget.onerror = null
-										}}
-									/>
-									<div className="flex justify-between mx-1 my-2">
-										<p className="text-white">{product.price} €</p>
-										<p className="text-white flex gap-1">
-											{product.likes}
-											<Heart />
-										</p>
-									</div>
-									{product.status !== "ACTIVE" && (
-										<div className="absolute top-0 h-full w-full bg-slate-900/50 flex justify-center items-center">
-											<h2 className="text-xl font-bold text-white">{product.status === "SOLD" ? "Vendu" : "Supprimé"}</h2>
+
+							<div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
+								{paginatedProducts.map((product) => (
+									<Link to={product.url} target="_blank" key={product.id} className="rounded-lg border border-ring overflow-hidden relative">
+										<img
+											src={product.img ?? error_fallback}
+											className="w-full h-40 object-cover"
+											onError={(e) => {
+												e.currentTarget.src = error_fallback
+												e.currentTarget.onerror = null
+											}}
+										/>
+										<div className="flex justify-between mx-1 my-2">
+											<p className="text-white">{formatNumber(Number(product.price), 2)} €</p>
+											<p className="text-white flex gap-1">
+												{product.likes}
+												<Heart />
+											</p>
 										</div>
-									)}
-								</Link>
-							))}
+										{product.status !== "ACTIVE" && (
+											<div className="absolute top-0 h-full w-full bg-slate-900/50 flex justify-center items-center">
+												<h2 className="text-xl font-bold text-white">{product.status === "SOLD" ? "Vendu" : "Supprimé"}</h2>
+											</div>
+										)}
+									</Link>
+								))}
+							</div>
+
+							{/* Pagination */}
+							{totalPages > 1 && (
+								<div className="flex items-center justify-center gap-4 mt-4">
+									<button
+										onClick={() => setPage(filter.id, currentPage - 1)}
+										disabled={currentPage === 1}
+										className="text-white disabled:opacity-30 hover:text-[#92adc9] transition-colors"
+									>
+										<ChevronLeft />
+									</button>
+									<span className="text-white text-sm">
+										{currentPage} / {totalPages}
+									</span>
+									<button
+										onClick={() => setPage(filter.id, currentPage + 1)}
+										disabled={currentPage === totalPages}
+										className="text-white disabled:opacity-30 hover:text-[#92adc9] transition-colors"
+									>
+										<ChevronRight />
+									</button>
+								</div>
+							)}
 						</div>
-					</div>
-				))}
+					)
+				})}
 			</div>
 		</div>
 	)

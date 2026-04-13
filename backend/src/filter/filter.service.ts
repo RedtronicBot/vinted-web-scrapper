@@ -67,7 +67,6 @@ export class FilterService {
               in: ["SOLD", "ACTIVE"],
             },
           },
-          take: 50,
           orderBy: [{ status: "desc" }, { likes: "desc" }],
           select: {
             id: true,
