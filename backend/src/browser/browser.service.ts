@@ -3,17 +3,25 @@ import { Browser, BrowserContext, chromium } from "playwright"
 
 @Injectable()
 export class BrowserService implements OnModuleDestroy {
-  private browser: Browser
+  private browser: Browser | null = null
+  private browserPromise: Promise<Browser> | null = null
 
   async getBrowser(): Promise<Browser> {
-    if (!this.browser) {
-      this.browser = await chromium.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      })
+    if (this.browser) return this.browser
+    if (!this.browserPromise) {
+      this.browserPromise = chromium
+        .launch({
+          headless: true,
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        })
+        .then((browser) => {
+          this.browser = browser
+          this.browserPromise = null
+          return browser
+        })
     }
 
-    return this.browser
+    return this.browserPromise
   }
 
   async createContext(): Promise<BrowserContext> {
