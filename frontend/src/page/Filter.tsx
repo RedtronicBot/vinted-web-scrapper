@@ -65,8 +65,9 @@ const Filter = () => {
 		},
 	})
 
-	const { register, handleSubmit, reset, setValue } = useForm<QueryInterface>()
-
+	const { register, handleSubmit, reset, setValue, watch } = useForm<QueryInterface>()
+	const selectedBrand = watch("brand")
+	const selectedCondition = watch("condition")
 	const onSubmit: SubmitHandler<QueryInterface> = async (data) => {
 		await createFilterMutation.mutateAsync(data)
 		reset()
@@ -221,9 +222,10 @@ const Filter = () => {
 								className={`${openBrand ? "" : "hidden"} bg-form w-max absolute z-10 top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
 								ref={brandModalRef}
 							>
-								{brand?.map((brands) => (
+								{brand?.map((brands, index) => (
 									<div
-										className="hover:bg-secondary w-full p-2 user-none cursor-pointer first:rounded-t-lg last:rounded-b-lg"
+										key={index}
+										className={`hover:bg-secondary ${selectedBrand === brands.id && "bg-secondary"} w-full p-2 user-none cursor-pointer first:rounded-t-lg last:rounded-b-lg`}
 										onClick={() => {
 											setValue("brand", brands.id)
 											setOpenBrand(!openBrand)
@@ -246,9 +248,10 @@ const Filter = () => {
 								className={`${openState ? "" : "hidden"} bg-form w-max absolute z-10 top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
 								ref={stateModalRef}
 							>
-								{condition?.map((conditions) => (
+								{condition?.map((conditions, index) => (
 									<div
-										className="hover:bg-secondary w-full p-2 user-none cursor-pointer first:rounded-t-lg last:rounded-b-lg"
+										key={index}
+										className={`hover:bg-secondary ${selectedCondition === conditions.id && "bg-secondary"} w-full p-2 user-none cursor-pointer first:rounded-t-lg last:rounded-b-lg`}
 										onClick={() => {
 											setValue("condition", conditions.id)
 											setOpenState(!openState)
@@ -303,6 +306,10 @@ const Filter = () => {
 												{product.likes}
 												<Heart />
 											</p>
+										</div>
+										<div className="flex flex-col gap-1 justify-between mx-1 my-2">
+											<p className="text-white">{product.size}</p>
+											<p className="text-white">{product.state}</p>
 										</div>
 										{product.status !== "ACTIVE" && (
 											<div className="absolute top-0 h-full w-full bg-slate-900/50 flex justify-center items-center">

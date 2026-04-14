@@ -77,6 +77,8 @@ export class FilterService {
             likes: true,
             sell_at: true,
             createdAt: true,
+            size: true,
+            state: true,
           },
         },
       },

@@ -8,6 +8,8 @@ export interface Product {
 	category: VintedCategory | null
 	sell_at: string
 	createdAt: string
+	size: string
+	state: string
 }
 
 export interface Filter {

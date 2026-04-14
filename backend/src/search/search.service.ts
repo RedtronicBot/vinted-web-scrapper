@@ -57,11 +57,11 @@ export class SearchService {
         throw new Error(`Navigation échouée : ${response?.status()}`)
       }
 
-      await page.waitForSelector(".feed-grid__item .new-item-box__container", {
+      await page.waitForSelector('[data-testid^="product-item-id-"]', {
         timeout: 15_000,
       })
 
-      const items = page.locator(".feed-grid__item .new-item-box__container")
+      const items = page.locator('[data-testid^="product-item-id-"]')
       const count = await items.count()
 
       const results: {
@@ -69,6 +69,8 @@ export class SearchService {
         likes: number
         imageUrl: string | null
         price: number
+        size: string | null
+        state: string | null
       }[] = []
 
       for (let i = 0; i < count; i++) {
@@ -110,8 +112,21 @@ export class SearchService {
             price = parseFloat(normalized)
           }
         }
+
+        let size: string | null = null
+        let state: string | null = null
+        const sizeLocator = item.locator('[data-testid$="--description-subtitle"]')
+        if ((await sizeLocator.count()) > 0) {
+          const rawText = await sizeLocator.textContent()
+          if (rawText) {
+            const textSplit = rawText.split("·")
+            size = textSplit[0].trim()
+            state = textSplit[1].trim()
+          }
+        }
+
         if (link) {
-          results.push({ link, likes, imageUrl, price })
+          results.push({ link, likes, imageUrl, price, size, state })
         }
       }
 
@@ -125,6 +140,8 @@ export class SearchService {
             price: product.price,
             img: product.imageUrl,
             likes: product.likes,
+            size: product.size,
+            state: product.state,
           },
           create: {
             url: product.link!,
@@ -133,6 +150,8 @@ export class SearchService {
             price: new Prisma.Decimal(product.price),
             filter_id: filter.id,
             likes: product.likes,
+            size: product.size,
+            state: product.state,
           },
         })
       }
