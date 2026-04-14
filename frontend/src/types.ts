@@ -6,6 +6,8 @@ export interface Product {
 	price: string
 	likes: number
 	category: VintedCategory | null
+	sell_at: string
+	createdAt: string
 }
 
 export interface Filter {

@@ -71,10 +71,12 @@ export class FilterService {
           select: {
             id: true,
             url: true,
+            status: true,
             img: true,
             price: true,
             likes: true,
-            status: true,
+            sell_at: true,
+            createdAt: true,
           },
         },
       },

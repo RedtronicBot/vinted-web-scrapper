@@ -306,7 +306,11 @@ const Filter = () => {
 										</div>
 										{product.status !== "ACTIVE" && (
 											<div className="absolute top-0 h-full w-full bg-slate-900/50 flex justify-center items-center">
-												<h2 className="text-xl font-bold text-white">{product.status === "SOLD" ? "Vendu" : "Supprimé"}</h2>
+												<h2 className="text-xl text-center font-bold text-white">
+													{product.status === "SOLD"
+														? `Vendu en ${Math.floor((new Date(product.sell_at).getTime() - new Date(product.createdAt).getTime()) / (1000 * 60 * 60 * 24))} jour(s)`
+														: "Supprimé"}
+												</h2>
 											</div>
 										)}
 									</Link>
