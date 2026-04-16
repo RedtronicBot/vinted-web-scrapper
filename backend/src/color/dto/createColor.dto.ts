@@ -1,6 +1,6 @@
 import { IsInt, IsString } from "class-validator"
 
-export class CreateConditionDto {
+export class CreateColorDto {
   @IsInt()
   id: number
   @IsString()

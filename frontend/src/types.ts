@@ -24,6 +24,7 @@ export interface Filter {
 		}
 	} | null
 	products: Product[]
+	color_ids: number[]
 }
 
 export interface Brand {
@@ -31,18 +32,9 @@ export interface Brand {
 	name: string
 }
 
-export interface Condition {
+export interface State {
 	id: number
 	name: string
-}
-
-export interface QueryInterface {
-	query: string
-	minPrice: number
-	maxPrice: number
-	brand: number
-	condition: number
-	category: number
 }
 
 export interface FilterDTO {
@@ -51,8 +43,9 @@ export interface FilterDTO {
 	min_cost: number
 	max_cost: number
 	brand_id: number
-	condition_id: number
+	state_id: number[]
 	category_id: number
+	color_id: number[]
 }
 
 export interface CategoryVinted {
@@ -87,4 +80,9 @@ export interface VintedFormValues {
 
 export interface VintedCategory {
 	category: Category
+}
+
+export interface Color {
+	id: number
+	name: string
 }

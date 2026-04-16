@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider     = "prisma-client"
   output       = "./generated/prisma"
@@ -28,19 +22,19 @@ model Brand {
 }
 
 model Filter {
-  id           Int             @id @default(autoincrement())
-  search       String
-  min_cost     Int
-  max_cost     Int
-  brand_id     Int?
-  brand        Brand?          @relation(fields: [brand_id], references: [id])
-  condition_id Int?
-  condition    Condition?      @relation(fields: [condition_id], references: [id])
-  products     Product[]
-  category_id  Int?
-  category     VintedCategory? @relation(fields: [category_id], references: [id])
+  id          Int             @id @default(autoincrement())
+  search      String
+  min_cost    Int
+  max_cost    Int
+  brand_id    Int?
+  brand       Brand?          @relation(fields: [brand_id], references: [id])
+  products    Product[]
+  category_id Int?
+  category    VintedCategory? @relation(fields: [category_id], references: [id])
+  colors      FilterColor[]
+  states      FilterState[]
 
-  @@unique([search, min_cost, max_cost, brand_id, condition_id])
+  @@unique([search, min_cost, max_cost, brand_id])
 }
 
 model Product {
@@ -89,8 +83,32 @@ model VintedCategory {
   filters     Filter[]
 }
 
-model Condition {
-  id      Int      @id @default(autoincrement())
-  name    String
-  filters Filter[]
+model State {
+  id           Int           @id @default(autoincrement())
+  name         String
+  filterStates FilterState[]
+}
+
+model Color {
+  id           Int           @id
+  name         String
+  filterColors FilterColor[]
+}
+
+model FilterColor {
+  filter_id Int
+  color_id  Int
+  filter    Filter @relation(fields: [filter_id], references: [id], onDelete: Cascade)
+  color     Color  @relation(fields: [color_id], references: [id], onDelete: Cascade)
+
+  @@id([filter_id, color_id])
+}
+
+model FilterState {
+  filter_id Int
+  state_id  Int
+  filter    Filter @relation(fields: [filter_id], references: [id], onDelete: Cascade)
+  state     State  @relation(fields: [state_id], references: [id], onDelete: Cascade)
+
+  @@id([filter_id, state_id])
 }

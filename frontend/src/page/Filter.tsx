@@ -3,7 +3,7 @@ import { useForm, type SubmitHandler } from "react-hook-form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { apiService } from "../services/apiService"
 import error_fallback from "../assets/image_fallback.png"
-import type { Category, QueryInterface, RootNode, StackItem } from "../types"
+import type { Category, FilterDTO, RootNode, StackItem } from "../types"
 import { Link } from "react-router"
 import { useRef, useState } from "react"
 import { findNode } from "../helpers/findnode"
@@ -29,6 +29,10 @@ const Filter = () => {
 	const stateModalRef = useRef(null)
 	const [openState, setOpenState] = useState(false)
 	useClickOutside(stateModalRef, () => setOpenState(false), stateRef)
+	const colorRef = useRef(null)
+	const colorModalRef = useRef(null)
+	const [openColor, setOpenColor] = useState(false)
+	useClickOutside(colorModalRef, () => setOpenColor(false), colorRef)
 	const { data: tree, isLoading: IsCategoryLoading } = useQuery<Category[]>({
 		queryKey: ["categories-tree"],
 		queryFn: apiService.getFullTree,
@@ -42,33 +46,39 @@ const Filter = () => {
 		queryFn: apiService.getFilters,
 		refetchInterval: 10 * 1000,
 	})
-	const { data: condition } = useQuery({
-		queryKey: ["condition"],
-		queryFn: apiService.getConditions,
+	const { data: state } = useQuery({
+		queryKey: ["state"],
+		queryFn: apiService.getStates,
 	})
 	const { data: brand } = useQuery({
 		queryKey: ["brand"],
 		queryFn: apiService.getBrands,
 	})
+	const { data: color } = useQuery({
+		queryKey: ["color"],
+		queryFn: apiService.getColors,
+	})
 	const createFilterMutation = useMutation({
-		mutationFn: (data: QueryInterface) =>
+		mutationFn: (data: Omit<FilterDTO, "id">) =>
 			apiService.createFilter({
-				search: data.query,
-				min_cost: data.minPrice,
-				max_cost: data.maxPrice,
-				brand_id: data.brand,
-				condition_id: data.condition,
-				category_id: data.category,
+				search: data.search,
+				min_cost: data.max_cost,
+				max_cost: data.max_cost,
+				brand_id: data.brand_id,
+				state_id: data.state_id,
+				category_id: data.category_id,
+				color_id: data.color_id,
 			}),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["filters"] })
 		},
 	})
 
-	const { register, handleSubmit, reset, setValue, watch } = useForm<QueryInterface>()
-	const selectedBrand = watch("brand")
-	const selectedCondition = watch("condition")
-	const onSubmit: SubmitHandler<QueryInterface> = async (data) => {
+	const { register, handleSubmit, reset, setValue, watch } = useForm<FilterDTO>()
+	const selectedBrand = watch("brand_id")
+	const selectedState = (watch("state_id") as number[] | undefined) ?? []
+	const selectedColors = (watch("color_id") as number[] | undefined) ?? []
+	const onSubmit: SubmitHandler<FilterDTO> = async (data) => {
 		await createFilterMutation.mutateAsync(data)
 		reset()
 	}
@@ -111,7 +121,7 @@ const Filter = () => {
 							<Search className="text-[#92adc9] absolute top-1/2 left-4 -translate-y-1/2" />
 							<input
 								type="text"
-								{...register("query")}
+								{...register("search")}
 								className="bg-form h-13 pl-12 pr-4 py-3.5 rounded-lg border text-[#92adc9] border-ring text-lg"
 								placeholder="Rechercher"
 							/>
@@ -150,7 +160,7 @@ const Filter = () => {
 													onClick={() => {
 														if (isLeaf) {
 															console.log("Produit sélectionné", cat)
-															setValue("category", cat.vinted.id)
+															setValue("category_id", cat.vinted.id)
 															setSelectedCategory(cat.vinted.id)
 															setOpenCategory(!openCategory)
 															return
@@ -191,7 +201,7 @@ const Filter = () => {
 									<div className="relative flex items-center border-b border-ring/50 focus-within:border-ring">
 										<input
 											type="number"
-											{...register("minPrice", { valueAsNumber: true })}
+											{...register("min_cost", { valueAsNumber: true })}
 											className="bg-form h-6 text-[#92adc9] text-lg w-12 outline-none pr-4"
 										/>
 										<span className="absolute right-0 text-[#92adc9] text-sm select-none">€</span>
@@ -203,7 +213,7 @@ const Filter = () => {
 									<div className="relative flex items-center border-b border-ring/50 focus-within:border-ring">
 										<input
 											type="number"
-											{...register("maxPrice", { valueAsNumber: true })}
+											{...register("max_cost", { valueAsNumber: true })}
 											className="bg-form h-6 text-[#92adc9] text-lg w-12 outline-none pr-4"
 										/>
 										<span className="absolute right-0 text-[#92adc9] text-sm select-none">€</span>
@@ -227,7 +237,7 @@ const Filter = () => {
 										key={index}
 										className={`hover:bg-secondary ${selectedBrand === brands.id && "bg-secondary"} w-full p-2 user-none cursor-pointer first:rounded-t-lg last:rounded-b-lg`}
 										onClick={() => {
-											setValue("brand", brands.id)
+											setValue("brand_id", brands.id)
 											setOpenBrand(!openBrand)
 											return
 										}}
@@ -235,6 +245,34 @@ const Filter = () => {
 										{brands.name}
 									</div>
 								))}
+							</div>
+						</div>
+
+						{/* Couleur */}
+						<div className="bg-form h-13 p-2 rounded-lg border text-[#92adc9] border-ring text-lg flex items-center relative">
+							<div className="flex gap-2 items-center select-none cursor-pointer" onClick={() => setOpenColor(!openColor)} ref={colorRef}>
+								<p>Couleur</p>
+								<ChevronDown />
+							</div>
+							<div
+								className={`${openColor ? "" : "hidden"} bg-form w-max absolute z-10 top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
+								ref={colorModalRef}
+							>
+								{color?.map((colors, index) => {
+									const isSelected = selectedColors.includes(colors.id)
+									return (
+										<div
+											key={index}
+											className={`hover:bg-secondary ${isSelected && "bg-secondary"} w-full p-2 user-none cursor-pointer first:rounded-t-lg last:rounded-b-lg`}
+											onClick={() => {
+												const updated = isSelected ? selectedColors.filter((id) => id !== colors.id) : [...selectedColors, colors.id]
+												setValue("color_id", updated)
+											}}
+										>
+											{colors.name}
+										</div>
+									)
+								})}
 							</div>
 						</div>
 
@@ -248,19 +286,21 @@ const Filter = () => {
 								className={`${openState ? "" : "hidden"} bg-form w-max absolute z-10 top-13 left-0 rounded-lg border text-[#92adc9] border-ring text-lg flex flex-col`}
 								ref={stateModalRef}
 							>
-								{condition?.map((conditions, index) => (
-									<div
-										key={index}
-										className={`hover:bg-secondary ${selectedCondition === conditions.id && "bg-secondary"} w-full p-2 user-none cursor-pointer first:rounded-t-lg last:rounded-b-lg`}
-										onClick={() => {
-											setValue("condition", conditions.id)
-											setOpenState(!openState)
-											return
-										}}
-									>
-										{conditions.name}
-									</div>
-								))}
+								{state?.map((states, index) => {
+									const isSelected = selectedState.includes(states.id)
+									return (
+										<div
+											key={index}
+											className={`hover:bg-secondary ${isSelected && "bg-secondary"} w-full p-2 user-none cursor-pointer first:rounded-t-lg last:rounded-b-lg`}
+											onClick={() => {
+												const updated = isSelected ? selectedState.filter((id) => id !== states.id) : [...selectedState, states.id]
+												setValue("state_id", updated)
+											}}
+										>
+											{states.name}
+										</div>
+									)
+								})}
 							</div>
 						</div>
 					</div>

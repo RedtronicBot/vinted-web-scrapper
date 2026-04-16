@@ -1,5 +1,5 @@
 import { createApiClient } from "../hooks/createApiClient"
-import type { Brand, Condition, Filter, FilterDTO } from "../types"
+import type { Brand, Color, Filter, FilterDTO, State } from "../types"
 
 const api = createApiClient()
 export const apiService = {
@@ -22,12 +22,12 @@ export const apiService = {
 		const { data } = await api.get("brand")
 		return data
 	},
-	getConditions: async (): Promise<Condition[]> => {
-		const { data } = await api.get("condition")
+	getStates: async (): Promise<State[]> => {
+		const { data } = await api.get("state")
 		return data
 	},
-	createCondition: async (dataCondition: Condition): Promise<Condition> => {
-		const { data } = await api.post("condition", dataCondition)
+	createState: async (dataState: State): Promise<State> => {
+		const { data } = await api.post("state", dataState)
 		return data
 	},
 	getCategories: async (parentId: number | null) => {
@@ -54,6 +54,14 @@ export const apiService = {
 	},
 	triggerCheck: async () => {
 		const { data } = await api.post("products/check")
+		return data
+	},
+	getColors: async (): Promise<Color[]> => {
+		const { data } = await api.get("color")
+		return data
+	},
+	createColor: async (dataColor: Color): Promise<Color[]> => {
+		const { data } = await api.post("color", dataColor)
 		return data
 	},
 }

@@ -6,16 +6,16 @@ import { CreateFilterDto } from "./dto/createFilter.dto"
 export class FilterService {
   constructor(private readonly prisma: PrismaService) {}
   async create(dto: CreateFilterDto) {
-    const { search, min_cost, max_cost, brand_id, condition_id, category_id } = dto
+    const { search, min_cost, max_cost, brand_id, state_id, category_id, color_id } = dto
     const existing = await this.prisma.filter.findFirst({
       where: {
         search,
         min_cost: min_cost ?? 0,
         max_cost: max_cost ?? 999999,
         brand_id,
-        condition_id,
         category_id,
       },
+      include: { colors: true, states: true },
     })
 
     if (existing) return existing
@@ -26,9 +26,19 @@ export class FilterService {
         min_cost: min_cost ?? 0,
         max_cost: max_cost ?? 999999,
         brand_id,
-        condition_id,
         category_id,
+        colors: {
+          createMany: {
+            data: color_id?.map((color_id) => ({ color_id })) ?? [],
+          },
+        },
+        states: {
+          createMany: {
+            data: state_id?.map((state_id) => ({ state_id })) ?? [],
+          },
+        },
       },
+      include: { colors: true, states: true },
     })
   }
   findById(id: number) {
@@ -36,7 +46,9 @@ export class FilterService {
   }
 
   findAll() {
-    return this.prisma.filter.findMany()
+    return this.prisma.filter.findMany({
+      include: { colors: true, states: true },
+    })
   }
 
   findMostLike() {

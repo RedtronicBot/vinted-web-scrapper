@@ -6,9 +6,10 @@ import { ConfigModule } from "@nestjs/config"
 import { SearchModule } from "./search/search.module"
 import { ProductcheckerModule } from "./productchecker/productchecker.module"
 import { ScheduleModule } from "@nestjs/schedule"
-import { ConditionModule } from './condition/condition.module';
-import { BrandModule } from './brand/brand.module';
-import { CategoryModule } from './category/category.module';
+import { StateModule } from "./state/state.module"
+import { BrandModule } from "./brand/brand.module"
+import { CategoryModule } from "./category/category.module"
+import { ColorModule } from "./color/color.module"
 
 @Module({
   imports: [
@@ -19,9 +20,10 @@ import { CategoryModule } from './category/category.module';
     FilterModule,
     SearchModule,
     ProductcheckerModule,
-    ConditionModule,
+    StateModule,
     BrandModule,
     CategoryModule,
+    ColorModule,
   ],
 })
 export class AppModule {}

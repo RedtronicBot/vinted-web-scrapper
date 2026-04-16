@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common"
-import { Filter, Prisma } from "prisma/generated/prisma/client"
+import { Filter, FilterColor, FilterState, Prisma } from "prisma/generated/prisma/client"
 import { PrismaService } from "prisma/prisma.service"
 import { BrowserService } from "src/browser/browser.service"
 
@@ -10,7 +10,7 @@ export class SearchService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async searchOnce(filter: Filter) {
+  async searchOnce(filter: Filter & { colors: FilterColor[] } & { states: FilterState[] }) {
     const since = Math.floor(Date.now() / 1000) - 60 * 5
     const baseUrl = "https://www.vinted.fr/catalog"
 
@@ -24,11 +24,18 @@ export class SearchService {
     if (filter.brand_id && filter.brand_id > 0) {
       url.searchParams.append("brand_ids[]", String(filter.brand_id))
     }
-    if (filter.condition_id && filter.condition_id > 0) {
-      url.searchParams.append("status_ids[]", String(filter.condition_id))
+    if (filter.states?.length > 0) {
+      filter.states.forEach(({ state_id }) => {
+        url.searchParams.append("status_ids[]", String(state_id))
+      })
     }
     if (filter.category_id && filter.category_id > 0) {
       url.searchParams.append("catalog[]", String(filter.category_id))
+    }
+    if (filter.colors?.length > 0) {
+      filter.colors.forEach(({ color_id }) => {
+        url.searchParams.append("color_ids[]", String(color_id))
+      })
     }
     const product = await this.collectCatalog(url, filter)
 
@@ -115,13 +122,15 @@ export class SearchService {
 
         let size: string | null = null
         let state: string | null = null
+
         const sizeLocator = item.locator('[data-testid$="--description-subtitle"]')
+
         if ((await sizeLocator.count()) > 0) {
           const rawText = await sizeLocator.textContent()
           if (rawText) {
             const textSplit = rawText.split("·")
-            size = textSplit[0].trim()
-            state = textSplit[1].trim()
+            size = textSplit[0]?.trim()
+            state = textSplit[1]?.trim()
           }
         }
 

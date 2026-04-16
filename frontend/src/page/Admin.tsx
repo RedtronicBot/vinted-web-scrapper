@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { apiService } from "../services/apiService"
-import type { Brand, Category, CategoryFormValues, Condition, RootNode, StackItem, VintedFormValues } from "../types"
+import type { Brand, Category, CategoryFormValues, Color, State, RootNode, StackItem, VintedFormValues } from "../types"
 import { useState } from "react"
 import { ArrowLeft, ChevronRight } from "lucide-react"
 import { findNode } from "../helpers/findnode"
@@ -21,13 +21,13 @@ const Admin = () => {
 		await createBrandMutation.mutateAsync(data)
 		resetBrand()
 	}
-	const createConditionMutation = useMutation({
-		mutationFn: apiService.createCondition,
+	const createStateMutation = useMutation({
+		mutationFn: apiService.createState,
 	})
-	const { register: registerCondition, handleSubmit: handleSubmitCondition, reset: resetCondition } = useForm<Condition>()
-	const onSubmitCondition: SubmitHandler<Condition> = async (data) => {
-		await createConditionMutation.mutateAsync(data)
-		resetCondition()
+	const { register: registerState, handleSubmit: handleSubmitState, reset: resetState } = useForm<State>()
+	const onSubmitState: SubmitHandler<State> = async (data) => {
+		await createStateMutation.mutateAsync(data)
+		resetState()
 	}
 	const { data: tree, isLoading } = useQuery<Category[]>({
 		queryKey: ["categories-tree"],
@@ -50,6 +50,7 @@ const Admin = () => {
 	const { register: regCat, handleSubmit: handleCat, reset: resetCat } = useForm<CategoryFormValues>()
 
 	const { register: regVinted, handleSubmit: handleVinted, reset: resetVinted } = useForm<VintedFormValues>()
+	const { register: registerColor, handleSubmit: handleColor, reset: resetColor } = useForm<Color>()
 
 	const createCategoryMutation = useMutation({
 		mutationFn: (data: { name: string; parent_id: number | null; position: number }) => apiService.createCategory(data),
@@ -65,6 +66,13 @@ const Admin = () => {
 		onSuccess: () => {
 			setShowAddVinted(false)
 			resetVinted()
+		},
+	})
+
+	const createColorMutation = useMutation({
+		mutationFn: (data: Color) => apiService.createColor(data),
+		onSuccess: () => {
+			resetColor()
 		},
 	})
 
@@ -85,6 +93,13 @@ const Admin = () => {
 		createVintedMutation.mutate({
 			id: Number(values.vinted_id),
 			category_id: currentId,
+		})
+	}
+
+	const onSubmitColor = (values: Color): void => {
+		createColorMutation.mutate({
+			id: Number(values.id),
+			name: values.name,
 		})
 	}
 	return (
@@ -125,12 +140,12 @@ const Admin = () => {
 				</div>
 				<div className="flex flex-col bg-secondary rounded-lg border border-ring p-4">
 					<p className="text-white text-lg font-bold">Ajouter un état</p>
-					<form onSubmit={handleSubmitCondition(onSubmitCondition)} className="flex items-end gap-2">
+					<form onSubmit={handleSubmitState(onSubmitState)} className="flex items-end gap-2">
 						<div className="flex flex-col gap-2">
 							<label className="text-white">Id</label>
 							<input
 								type="number"
-								{...registerCondition("id", { valueAsNumber: true })}
+								{...registerState("id", { valueAsNumber: true })}
 								className="bg-form h-13 pl-2 w-30 pr-4 py-3.5 rounded-lg border text-[#92adc9] border-ring text-lg"
 							/>
 						</div>
@@ -138,7 +153,29 @@ const Admin = () => {
 							<label className="text-white">Nom</label>
 							<input
 								type="text"
-								{...registerCondition("name")}
+								{...registerState("name")}
+								className="bg-form h-13 pl-2 pr-4 py-3.5 rounded-lg border text-[#92adc9] border-ring text-lg"
+							/>
+						</div>
+						<button className="text-white h-fit font-bold rounded-lg px-8 py-3 bg-primary">Ajouter</button>
+					</form>
+				</div>
+				<div className="flex flex-col bg-secondary rounded-lg border border-ring p-4">
+					<p className="text-white text-lg font-bold">Ajouter une couleur</p>
+					<form onSubmit={handleColor(onSubmitColor)} className="flex items-end gap-2">
+						<div className="flex flex-col gap-2">
+							<label className="text-white">Id</label>
+							<input
+								type="number"
+								{...registerColor("id", { valueAsNumber: true })}
+								className="bg-form h-13 pl-2 w-30 pr-4 py-3.5 rounded-lg border text-[#92adc9] border-ring text-lg"
+							/>
+						</div>
+						<div className="flex flex-col gap-2">
+							<label className="text-white">Nom</label>
+							<input
+								type="text"
+								{...registerColor("name")}
 								className="bg-form h-13 pl-2 pr-4 py-3.5 rounded-lg border text-[#92adc9] border-ring text-lg"
 							/>
 						</div>

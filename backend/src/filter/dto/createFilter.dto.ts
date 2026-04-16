@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, Min } from "class-validator"
+import { IsArray, IsInt, IsOptional, IsString, Min } from "class-validator"
 
 export class CreateFilterDto {
   @IsString()
@@ -17,9 +17,14 @@ export class CreateFilterDto {
   @IsInt()
   brand_id: number
 
-  @IsInt()
-  condition_id: number
+  @IsArray()
+  @IsInt({ each: true })
+  state_id: number[]
 
   @IsInt()
   category_id: number
+
+  @IsArray()
+  @IsInt({ each: true })
+  color_id: number[]
 }
