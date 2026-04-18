@@ -33,8 +33,6 @@ model Filter {
   category    VintedCategory? @relation(fields: [category_id], references: [id])
   colors      FilterColor[]
   states      FilterState[]
-
-  @@unique([search, min_cost, max_cost, brand_id])
 }
 
 model Product {
