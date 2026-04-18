@@ -7,19 +7,6 @@ export class FilterService {
   constructor(private readonly prisma: PrismaService) {}
   async create(dto: CreateFilterDto) {
     const { search, min_cost, max_cost, brand_id, state_id, category_id, color_id } = dto
-    const existing = await this.prisma.filter.findFirst({
-      where: {
-        search,
-        min_cost: min_cost ?? 0,
-        max_cost: max_cost ?? 999999,
-        brand_id,
-        category_id,
-      },
-      include: { colors: true, states: true },
-    })
-
-    if (existing) return existing
-
     return this.prisma.filter.create({
       data: {
         search,
