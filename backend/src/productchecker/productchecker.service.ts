@@ -97,15 +97,20 @@ export class ProductCheckerService {
       })
 
       const response = await page.goto(url, { waitUntil: "domcontentloaded" })
+      // Vinted redirige parfois vers le profil vendeur au lieu d'une 404
+      const finalUrl = page.url()
+      const isRedirectedToMember = /\/member(s)?\//i.test(finalUrl)
 
-      if (!response || !response.ok()) {
-        // Produit probablement supprimé ou indisponible
-        if (response?.status() === 404) {
+      if (!response || !response.ok() || isRedirectedToMember) {
+        const is404 = response?.status() === 404
+        const isGone = isRedirectedToMember
+
+        if (is404 || isGone) {
           await this.prisma.product.update({
             where: { id: productId },
             data: { status: "DELETE" },
           })
-          this.logger.log(`Produit supprimé : ${url}`)
+          this.logger.log(`Produit supprimé : ${url}${isGone ? ` (redirigé vers ${finalUrl})` : " (404)"}`)
         }
         return
       }
