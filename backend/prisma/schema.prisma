@@ -33,6 +33,7 @@ model Filter {
   category    VintedCategory? @relation(fields: [category_id], references: [id])
   colors      FilterColor[]
   states      FilterState[]
+  sizes       FilterSize[]
 }
 
 model Product {
@@ -71,6 +72,7 @@ model Category {
   children  Category[]      @relation("CategoryTree")
   position  Int             @default(0)
   vinted    VintedCategory?
+  sizes     Size[]
 }
 
 model VintedCategory {
@@ -93,6 +95,14 @@ model Color {
   filterColors FilterColor[]
 }
 
+model Size {
+  id          Int          @id
+  name        String
+  category_id Int?
+  category    Category?    @relation(fields: [category_id], references: [id])
+  filterSizes FilterSize[]
+}
+
 model FilterColor {
   filter_id Int
   color_id  Int
@@ -109,4 +119,13 @@ model FilterState {
   state     State  @relation(fields: [state_id], references: [id], onDelete: Cascade)
 
   @@id([filter_id, state_id])
+}
+
+model FilterSize {
+  filter_id Int
+  size_id   Int
+  filter    Filter @relation(fields: [filter_id], references: [id], onDelete: Cascade)
+  size      Size   @relation(fields: [size_id], references: [id], onDelete: Cascade)
+
+  @@id([filter_id, size_id])
 }

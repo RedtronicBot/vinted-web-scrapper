@@ -6,7 +6,7 @@ import { CreateFilterDto } from "./dto/createFilter.dto"
 export class FilterService {
   constructor(private readonly prisma: PrismaService) {}
   async create(dto: CreateFilterDto) {
-    const { search, min_cost, max_cost, brand_id, state_id, category_id, color_id } = dto
+    const { search, min_cost, max_cost, brand_id, state_id, category_id, color_id, size_id } = dto
     return this.prisma.filter.create({
       data: {
         search,
@@ -24,8 +24,13 @@ export class FilterService {
             data: state_id?.map((state_id) => ({ state_id })) ?? [],
           },
         },
+        sizes: {
+          createMany: {
+            data: size_id?.map((size_id) => ({ size_id })) ?? [],
+          },
+        },
       },
-      include: { colors: true, states: true },
+      include: { colors: true, states: true, sizes: true },
     })
   }
   findById(id: number) {
@@ -34,7 +39,7 @@ export class FilterService {
 
   findAll() {
     return this.prisma.filter.findMany({
-      include: { colors: true, states: true },
+      include: { colors: true, states: true, sizes: true },
     })
   }
 

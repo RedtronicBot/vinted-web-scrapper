@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common"
-import { Filter, FilterColor, FilterState, Prisma } from "prisma/generated/prisma/client"
+import { Filter, FilterColor, FilterSize, FilterState, Prisma } from "prisma/generated/prisma/client"
 import { PrismaService } from "prisma/prisma.service"
 import { BrowserService } from "src/browser/browser.service"
 
@@ -10,7 +10,7 @@ export class SearchService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async searchOnce(filter: Filter & { colors: FilterColor[] } & { states: FilterState[] }) {
+  async searchOnce(filter: Filter & { colors: FilterColor[] } & { states: FilterState[] } & { sizes: FilterSize[] }) {
     const since = Math.floor(Date.now() / 1000) - 60 * 5
     const baseUrl = "https://www.vinted.fr/catalog"
 
@@ -35,6 +35,11 @@ export class SearchService {
     if (filter.colors?.length > 0) {
       filter.colors.forEach(({ color_id }) => {
         url.searchParams.append("color_ids[]", String(color_id))
+      })
+    }
+    if (filter.sizes?.length > 0) {
+      filter.sizes.forEach(({ size_id }) => {
+        url.searchParams.append("size_ids[]", String(size_id))
       })
     }
     const product = await this.collectCatalog(url, filter)

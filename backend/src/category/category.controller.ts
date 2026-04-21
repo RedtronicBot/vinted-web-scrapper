@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common"
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from "@nestjs/common"
 import { CategoryService } from "./category.service"
 
 @Controller("category")
@@ -19,5 +19,10 @@ export class CategoryController {
   @Post("vinted")
   createVintedCategory(@Body() body: { id: number; category_id: number }) {
     return this.categoryService.createVintedCategory(body)
+  }
+
+  @Get(":id/sizes")
+  getCategorySizes(@Param("id", ParseIntPipe) id: number) {
+    return this.categoryService.getCategorySizes(id)
   }
 }

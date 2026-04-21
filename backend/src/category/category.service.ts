@@ -46,4 +46,9 @@ export class CategoryService {
   async createVintedCategory(data: { id: number; category_id: number }) {
     return this.prisma.vintedCategory.create({ data })
   }
+  getCategorySizes(id: number) {
+    return this.prisma.size.findMany({
+      where: { category_id: id },
+    })
+  }
 }

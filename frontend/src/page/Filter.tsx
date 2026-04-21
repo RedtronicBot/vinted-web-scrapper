@@ -1,44 +1,21 @@
-import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight, Heart, Search, Trash } from "lucide-react"
+import { ChevronLeft, ChevronRight, Heart, Search, Trash } from "lucide-react"
 import { useForm, type SubmitHandler } from "react-hook-form"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { apiService } from "../services/apiService"
 import error_fallback from "../assets/image_fallback.png"
-import type { Category, FilterDTO, RootNode, StackItem } from "../types"
+import type { FilterDTO } from "../types"
 import { Link } from "react-router"
-import { useRef, useState } from "react"
-import { findNode } from "../helpers/findnode"
-import { useClickOutside } from "../hooks/useClickOutside"
+import { useState } from "react"
 import { formatNumber } from "../utils/formatNumber"
+import Categorie from "../components/Filter/Categorie"
+import Taille from "../components/Filter/Taille"
+import Prix from "../components/Filter/Prix"
+import Marque from "../components/Filter/Marque"
+import Couleur from "../components/Filter/Couleur"
+import Etat from "../components/Filter/Etat"
 
 const Filter = () => {
-  const [stack, setStack] = useState<StackItem[]>([])
-  const [selectedCategory, setSelectedCategory] = useState(0)
-  const categoryRef = useRef(null)
-  const categoryModalRef = useRef(null)
-  const [openCategory, setOpenCategory] = useState(false)
-  useClickOutside(categoryModalRef, () => setOpenCategory(false), categoryRef)
-  const priceRef = useRef(null)
-  const priceModalRef = useRef(null)
-  const [openPrice, setOpenPrice] = useState(false)
-  useClickOutside(priceModalRef, () => setOpenPrice(false), priceRef)
-  const brandRef = useRef(null)
-  const brandModalRef = useRef(null)
-  const [openBrand, setOpenBrand] = useState(false)
-  useClickOutside(brandModalRef, () => setOpenBrand(false), brandRef)
-  const stateRef = useRef(null)
-  const stateModalRef = useRef(null)
-  const [openState, setOpenState] = useState(false)
-  useClickOutside(stateModalRef, () => setOpenState(false), stateRef)
-  const colorRef = useRef(null)
-  const colorModalRef = useRef(null)
-  const [openColor, setOpenColor] = useState(false)
-  useClickOutside(colorModalRef, () => setOpenColor(false), colorRef)
-  const { data: tree, isLoading: IsCategoryLoading } = useQuery<Category[]>({
-    queryKey: ["categories-tree"],
-    queryFn: apiService.getFullTree,
-    staleTime: Infinity,
-  })
-  const currentNode: RootNode | Category | null = stack.length === 0 ? { children: tree ?? [] } : findNode(tree ?? [], stack[stack.length - 1].id)
+  const [selectedCategoryId, setSelectedCategoryId] = useState(0)
   const queryClient = useQueryClient()
 
   const { data: filters, isLoading } = useQuery({
@@ -46,18 +23,7 @@ const Filter = () => {
     queryFn: apiService.getFilters,
     refetchInterval: 10 * 1000,
   })
-  const { data: state } = useQuery({
-    queryKey: ["state"],
-    queryFn: apiService.getStates,
-  })
-  const { data: brand } = useQuery({
-    queryKey: ["brand"],
-    queryFn: apiService.getBrands,
-  })
-  const { data: color } = useQuery({
-    queryKey: ["color"],
-    queryFn: apiService.getColors,
-  })
+
   const createFilterMutation = useMutation({
     mutationFn: (data: Omit<FilterDTO, "id">) =>
       apiService.createFilter({
@@ -68,6 +34,7 @@ const Filter = () => {
         state_id: data.state_id,
         category_id: data.category_id,
         color_id: data.color_id,
+        size_id: data.size_id,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["filters"] })
@@ -78,12 +45,11 @@ const Filter = () => {
   const selectedBrand = watch("brand_id")
   const selectedState = (watch("state_id") as number[] | undefined) ?? []
   const selectedColors = (watch("color_id") as number[] | undefined) ?? []
+  const selectedSizes = (watch("size_id") as number[] | undefined) ?? []
   const onSubmit: SubmitHandler<FilterDTO> = async (data) => {
+    console.log("🚀 ~ onSubmit ~ data:", data)
     await createFilterMutation.mutateAsync(data)
     reset()
-  }
-  const navigateTo = (item: StackItem): void => {
-    setStack((prev) => [...prev, item])
   }
 
   const deleteFilterMutation = useMutation({
@@ -127,182 +93,23 @@ const Filter = () => {
               />
             </div>
 
-            <div className="bg-form border-ring relative flex h-13 items-center rounded-lg border p-2 text-lg text-[#92adc9]">
-              <div className="flex cursor-pointer items-center gap-2 select-none" onClick={() => setOpenCategory(!openCategory)} ref={categoryRef}>
-                <p>Catégorie</p>
-                <ChevronDown />
-              </div>
-              <div
-                className={`${openCategory ? "" : "hidden"} bg-form border-ring absolute top-13 left-0 z-10 flex max-h-64 w-40 flex-col overflow-scroll rounded-lg border text-lg text-[#92adc9]`}
-                ref={categoryModalRef}
-              >
-                {stack.length > 0 && (
-                  <div className="flex items-center justify-between gap-2">
-                    <button type="button" onClick={() => setStack((prev) => prev.slice(0, -1))}>
-                      <ArrowLeft />
-                    </button>
-                    <span className="text-lg text-gray-400">{stack[stack.length - 1].name}</span>
-                    <div className="w-6"></div>
-                  </div>
-                )}
-                <div className="flex w-full flex-col">
-                  {IsCategoryLoading ? (
-                    <p className="text-white">Chargement...</p>
-                  ) : !currentNode || currentNode.children.length === 0 ? (
-                    <p className="text-white">Aucune sous-catégorie</p>
-                  ) : (
-                    currentNode.children.map((cat: Category) => {
-                      const isLeaf = !!cat.vinted
-                      return (
-                        <div
-                          key={cat.id}
-                          className="border-t-ring flex w-full cursor-pointer items-center justify-between border-t first:rounded-t-lg first:border-t-0 last:rounded-b-lg hover:bg-[#2D353C]"
-                          onClick={() => {
-                            if (isLeaf) {
-                              console.log("Produit sélectionné", cat)
-                              setValue("category_id", cat.vinted.id)
-                              setSelectedCategory(cat.vinted.id)
-                              setOpenCategory(!openCategory)
-                              return
-                            }
-                            if (!isLeaf) navigateTo({ id: cat.id, name: cat.name })
-                          }}
-                        >
-                          <span className="pl-1 text-white">{cat.name}</span>
-                          {!isLeaf && cat.children.length > 0 ? (
-                            <span>
-                              <ChevronRight className="text-lg text-white" />
-                            </span>
-                          ) : cat.vinted?.id ? (
-                            <div className="mr-1 h-fit w-fit rounded-full border-2 border-gray-500 p-0.5">
-                              <div className={`${selectedCategory === cat.vinted.id ? "bg-green-500" : "bg-form"} h-2.5 w-2.5 rounded-full`}></div>
-                            </div>
-                          ) : null}
-                        </div>
-                      )
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
+            {/* Catégorie*/}
+            <Categorie setValue={setValue} setSelectedCategoryId={setSelectedCategoryId} />
+
+            {/* Taille */}
+            <Taille setValue={setValue} selectedCategoryId={selectedCategoryId} selectedSizes={selectedSizes} />
 
             {/* Prix */}
-            <div className="bg-form border-ring relative flex h-13 items-center rounded-lg border p-2 text-lg text-[#92adc9]">
-              <div className="flex cursor-pointer items-center gap-2 select-none" onClick={() => setOpenPrice(!openPrice)} ref={priceRef}>
-                <p>Prix</p>
-                <ChevronDown />
-              </div>
-              <div
-                className={`${openPrice ? "" : "hidden"} bg-form border-ring absolute top-13 left-0 z-10 flex w-fit gap-4 rounded-lg border p-4 text-lg text-[#92adc9]`}
-                ref={priceModalRef}
-              >
-                <div className="flex flex-col gap-1">
-                  <label className="text-[#92adc9]">De</label>
-                  <div className="border-ring/50 focus-within:border-ring relative flex items-center border-b">
-                    <input
-                      type="number"
-                      {...register("min_cost", { valueAsNumber: true })}
-                      className="bg-form h-6 w-12 pr-4 text-lg text-[#92adc9] outline-none"
-                    />
-                    <span className="absolute right-0 text-sm text-[#92adc9] select-none">€</span>
-                  </div>
-                </div>
+            <Prix register={register} />
 
-                <div className="flex flex-col gap-1">
-                  <label className="text-[#92adc9]">À</label>
-                  <div className="border-ring/50 focus-within:border-ring relative flex items-center border-b">
-                    <input
-                      type="number"
-                      {...register("max_cost", { valueAsNumber: true })}
-                      className="bg-form h-6 w-12 pr-4 text-lg text-[#92adc9] outline-none"
-                    />
-                    <span className="absolute right-0 text-sm text-[#92adc9] select-none">€</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* BRAND */}
-            <div className="bg-form border-ring relative flex h-13 items-center rounded-lg border p-2 text-lg text-[#92adc9]">
-              <div className="flex cursor-pointer items-center gap-2 select-none" onClick={() => setOpenBrand(!openBrand)} ref={brandRef}>
-                <p>Marque</p>
-                <ChevronDown />
-              </div>
-              <div
-                className={`${openBrand ? "" : "hidden"} bg-form border-ring absolute top-13 left-0 z-10 flex max-h-64 w-max flex-col overflow-scroll rounded-lg border text-lg text-[#92adc9]`}
-                ref={brandModalRef}
-              >
-                {brand?.map((brands, index) => (
-                  <div
-                    key={index}
-                    className={`hover:bg-secondary ${selectedBrand === brands.id && "bg-secondary"} user-none w-full cursor-pointer p-2 first:rounded-t-lg last:rounded-b-lg`}
-                    onClick={() => {
-                      setValue("brand_id", brands.id)
-                      setOpenBrand(!openBrand)
-                      return
-                    }}
-                  >
-                    {brands.name}
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Marque */}
+            <Marque selectedBrand={selectedBrand} setValue={setValue} />
 
             {/* Couleur */}
-            <div className="bg-form border-ring relative flex h-13 items-center rounded-lg border p-2 text-lg text-[#92adc9]">
-              <div className="flex cursor-pointer items-center gap-2 select-none" onClick={() => setOpenColor(!openColor)} ref={colorRef}>
-                <p>Couleur</p>
-                <ChevronDown />
-              </div>
-              <div
-                className={`${openColor ? "" : "hidden"} bg-form border-ring absolute top-13 left-0 z-10 flex max-h-64 w-max flex-col overflow-scroll rounded-lg border text-lg text-[#92adc9]`}
-                ref={colorModalRef}
-              >
-                {color?.map((colors, index) => {
-                  const isSelected = selectedColors.includes(colors.id)
-                  return (
-                    <div
-                      key={index}
-                      className={`hover:bg-secondary ${isSelected && "bg-secondary"} user-none w-full cursor-pointer p-2 first:rounded-t-lg last:rounded-b-lg`}
-                      onClick={() => {
-                        const updated = isSelected ? selectedColors.filter((id) => id !== colors.id) : [...selectedColors, colors.id]
-                        setValue("color_id", updated)
-                      }}
-                    >
-                      {colors.name}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+            <Couleur selectedColors={selectedColors} setValue={setValue} />
 
             {/* Etat */}
-            <div className="bg-form border-ring relative flex h-13 items-center rounded-lg border p-2 text-lg text-[#92adc9]">
-              <div className="flex cursor-pointer items-center gap-2 select-none" onClick={() => setOpenState(!openState)} ref={stateRef}>
-                <p>État</p>
-                <ChevronDown />
-              </div>
-              <div
-                className={`${openState ? "" : "hidden"} bg-form border-ring absolute top-13 left-0 z-10 flex max-h-64 w-max flex-col overflow-scroll rounded-lg border text-lg text-[#92adc9]`}
-                ref={stateModalRef}
-              >
-                {state?.map((states, index) => {
-                  const isSelected = selectedState.includes(states.id)
-                  return (
-                    <div
-                      key={index}
-                      className={`hover:bg-secondary ${isSelected && "bg-secondary"} user-none w-full cursor-pointer p-2 first:rounded-t-lg last:rounded-b-lg`}
-                      onClick={() => {
-                        const updated = isSelected ? selectedState.filter((id) => id !== states.id) : [...selectedState, states.id]
-                        setValue("state_id", updated)
-                      }}
-                    >
-                      {states.name}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
+            <Etat selectedStates={selectedState} setValue={setValue} />
           </div>
 
           <button className="bg-primary cursor-pointer rounded-lg px-8 py-3 font-bold text-white">Appliquer</button>
@@ -330,38 +137,39 @@ const Filter = () => {
               </div>
 
               <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
-                {paginatedProducts.map((product) => (
-                  <Link to={product.url} target="_blank" key={product.id} className="border-ring relative overflow-hidden rounded-lg border">
-                    <img
-                      src={product.img ?? error_fallback}
-                      className="h-40 w-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = error_fallback
-                        e.currentTarget.onerror = null
-                      }}
-                    />
-                    <div className="mx-1 my-2 flex justify-between">
-                      <p className="text-white">{formatNumber(Number(product.price), 2)} €</p>
-                      <p className="flex gap-1 text-white">
-                        {product.likes}
-                        <Heart />
-                      </p>
-                    </div>
-                    <div className="mx-1 my-2 flex flex-col justify-between gap-1">
-                      <p className="text-white">{product.size}</p>
-                      <p className="text-white">{product.state}</p>
-                    </div>
-                    {product.status !== "ACTIVE" && (
-                      <div className="absolute top-0 flex h-full w-full items-center justify-center bg-slate-900/50">
-                        <h2 className="text-center text-xl font-bold text-white">
-                          {product.status === "SOLD"
-                            ? `Vendu en ${Math.floor((new Date(product.sell_at).getTime() - new Date(product.createdAt).getTime()) / (1000 * 60 * 60 * 24))} jour(s)`
-                            : "Supprimé"}
-                        </h2>
+                {paginatedProducts
+                  .filter((product) => product.status !== "ARCHIVED")
+                  .map((product) => (
+                    <Link to={product.url} target="_blank" key={product.id} className="border-ring relative overflow-hidden rounded-lg border">
+                      <img
+                        src={product.img ?? error_fallback}
+                        className="h-40 w-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = error_fallback
+                          e.currentTarget.onerror = null
+                        }}
+                      />
+                      <div className="mx-1 my-2 flex justify-between">
+                        <p className="text-white">{formatNumber(Number(product.price), 2)} €</p>
+                        <p className="flex gap-1 text-white">
+                          {product.likes}
+                          <Heart />
+                        </p>
                       </div>
-                    )}
-                  </Link>
-                ))}
+                      <div className="mx-1 my-2 flex flex-col justify-between gap-1">
+                        <p className="text-white">{product.size}</p>
+                        <p className="text-white">{product.state}</p>
+                      </div>
+                      {product.status !== "ACTIVE" && (
+                        <div className="absolute top-0 flex h-full w-full items-center justify-center bg-slate-900/50">
+                          <h2 className="text-center text-xl font-bold text-white">
+                            {product.status === "SOLD" &&
+                              `Vendu en ${Math.floor((new Date(product.sell_at).getTime() - new Date(product.createdAt).getTime()) / (1000 * 60 * 60 * 24))} jour(s)`}
+                          </h2>
+                        </div>
+                      )}
+                    </Link>
+                  ))}
               </div>
 
               {/* Pagination */}

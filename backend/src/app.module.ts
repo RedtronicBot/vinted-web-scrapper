@@ -10,6 +10,7 @@ import { StateModule } from "./state/state.module"
 import { BrandModule } from "./brand/brand.module"
 import { CategoryModule } from "./category/category.module"
 import { ColorModule } from "./color/color.module"
+import { SizeModule } from "./size/size.module"
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ColorModule } from "./color/color.module"
     BrandModule,
     CategoryModule,
     ColorModule,
+    SizeModule,
   ],
 })
 export class AppModule {}

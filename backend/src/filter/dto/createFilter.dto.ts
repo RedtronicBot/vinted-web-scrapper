@@ -27,4 +27,8 @@ export class CreateFilterDto {
   @IsArray()
   @IsInt({ each: true })
   color_id: number[]
+
+  @IsArray()
+  @IsInt({ each: true })
+  size_id: number[]
 }
