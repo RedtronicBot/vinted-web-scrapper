@@ -83,6 +83,7 @@ export class SearchService {
         price: number
         size: string | null
         state: string | null
+        boosted: boolean
       }[] = []
 
       for (let i = 0; i < count; i++) {
@@ -138,9 +139,14 @@ export class SearchService {
             state = textSplit[1]?.trim()
           }
         }
+        let boosted = false
+        const boostedLocator = item.locator('[data-testid$="--bump-text"]')
+        if ((await boostedLocator.count()) > 0) {
+          boosted = true
+        }
 
         if (link) {
-          results.push({ link, likes, imageUrl, price, size, state })
+          results.push({ link, likes, imageUrl, price, size, state, boosted })
         }
       }
 
@@ -156,6 +162,7 @@ export class SearchService {
             likes: product.likes,
             size: product.size,
             state: product.state,
+            boosted: product.boosted,
           },
           create: {
             url: product.link!,
@@ -166,6 +173,7 @@ export class SearchService {
             likes: product.likes,
             size: product.size,
             state: product.state,
+            boosted: product.boosted,
           },
         })
       }
