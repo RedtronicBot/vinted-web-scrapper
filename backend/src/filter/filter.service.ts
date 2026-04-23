@@ -83,6 +83,7 @@ export class FilterService {
             createdAt: true,
             size: true,
             state: true,
+            boosted: true,
           },
         },
       },

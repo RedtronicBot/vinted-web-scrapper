@@ -10,6 +10,7 @@ export interface Product {
   createdAt: string
   size: string
   state: string
+  boosted: boolean
 }
 
 export interface Filter {

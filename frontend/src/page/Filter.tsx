@@ -47,7 +47,6 @@ const Filter = () => {
   const selectedColors = (watch("color_id") as number[] | undefined) ?? []
   const selectedSizes = (watch("size_id") as number[] | undefined) ?? []
   const onSubmit: SubmitHandler<FilterDTO> = async (data) => {
-    console.log("🚀 ~ onSubmit ~ data:", data)
     await createFilterMutation.mutateAsync(data)
     reset()
   }
@@ -156,6 +155,7 @@ const Filter = () => {
                           <Heart />
                         </p>
                       </div>
+                      {product.boosted && <p className="text-white">boostée</p>}
                       <div className="mx-1 my-2 flex flex-col justify-between gap-1">
                         <p className="text-white">{product.size}</p>
                         <p className="text-white">{product.state}</p>
