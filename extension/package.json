@@ -1,0 +1,20 @@
+{
+	"name": "extension",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite build --watch",
+		"build": "tsc && vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"@types/chrome": "^0.1.40",
+		"@types/node": "^25.6.0",
+		"typescript": "~6.0.2",
+		"vite": "^8.0.10"
+	},
+	"dependencies": {
+		"vite-plugin-static-copy": "^4.1.0"
+	}
+}

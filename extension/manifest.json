@@ -1,0 +1,14 @@
+{
+	"manifest_version": 3,
+	"name": "Vinted Reupload",
+	"version": "1.0.0",
+	"description": "Reupload Vinted items easily",
+	"permissions": ["storage"],
+	"host_permissions": ["https://www.vinted.fr/*"],
+	"content_scripts": [
+		{
+			"matches": ["https://www.vinted.fr/*"],
+			"js": ["content.js"]
+		}
+	]
+}

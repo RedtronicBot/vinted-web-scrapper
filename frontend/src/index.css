@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+	--color-background: #101922;
+	--color-primary: #2b8cee;
+	--color-secondary: #192633;
+	--color-tertiary: #232f3d;
+	--color-form: #111a22;
+	--color-ring: #324d67;
+	--color-ring-secondary: #45607a;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+	-moz-appearance: textfield;
+}

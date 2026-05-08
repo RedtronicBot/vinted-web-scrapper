@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Color` MODIFY `id` INTEGER NOT NULL;
