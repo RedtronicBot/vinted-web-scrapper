@@ -32,7 +32,8 @@ export async function renderStoredItems() {
 }
 
 function renderItem(item: VintedItem) {
-	const firstPhoto = item.photos[0] ? `${UPLOADS_URL}/${item.photos[0].filename}` : null
+	const firstPhoto = item.photos[0] ? `${UPLOADS_URL}/uploads/${item.photos[0].filename}` : null
+	console.log("🚀 ~ renderItem ~ firstPhoto:", firstPhoto)
 
 	return `
     <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0f0;">
