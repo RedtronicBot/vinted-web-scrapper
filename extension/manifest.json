@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"description": "Reupload Vinted items easily",
 	"permissions": ["storage"],
-	"host_permissions": ["https://www.vinted.fr/*"],
+	"host_permissions": ["https://www.vinted.fr/*", "https://extensionapi.redtrotool.fr/*"],
 	"content_scripts": [
 		{
 			"matches": ["https://www.vinted.fr/*"],
