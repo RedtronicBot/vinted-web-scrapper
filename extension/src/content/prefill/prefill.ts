@@ -1,18 +1,23 @@
-import { getPrefill, clearPrefill } from "../storage/storage"
 import { waitForElement } from "../utils/dom"
 import { fillReactInput, fillReactTextarea } from "./fillInputs"
+import type { VintedItem } from "../../types"
 
+export const setPrefill = (item: VintedItem) => chrome.storage.local.set({ pendingPrefill: item })
+
+export const getPrefill = (): Promise<{ pendingPrefill?: VintedItem }> => chrome.storage.local.get("pendingPrefill")
+
+export const clearPrefill = () => chrome.storage.local.remove("pendingPrefill")
 export function handlePrefill() {
-  if (window.location.pathname !== "/items/new") return
+	if (window.location.pathname !== "/items/new") return
 
-  getPrefill().then(({ pendingPrefill }) => {
-    if (!pendingPrefill) return
+	getPrefill().then(({ pendingPrefill }) => {
+		if (!pendingPrefill) return
 
-    waitForElement('[data-testid="price-input--input"]').then(() => {
-      fillReactInput('input[name="title"]', pendingPrefill.title)
-      fillReactInput('[data-testid="price-input--input"]', String(pendingPrefill.price))
-      fillReactTextarea('textarea[name="description"]', pendingPrefill.description ?? "")
-      clearPrefill()
-    })
-  })
+		waitForElement('[data-testid="price-input--input"]').then(() => {
+			fillReactInput('input[name="title"]', pendingPrefill.title)
+			fillReactInput('[data-testid="price-input--input"]', String(pendingPrefill.price))
+			fillReactTextarea('textarea[name="description"]', pendingPrefill.description ?? "")
+			clearPrefill()
+		})
+	})
 }

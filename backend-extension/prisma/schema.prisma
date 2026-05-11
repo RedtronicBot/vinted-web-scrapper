@@ -1,0 +1,32 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "./generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model VintedItem {
+  id          Int      @id @default(autoincrement())
+  title       String
+  price       Decimal  @db.Decimal(10, 2)
+  status      String?
+  description String?  @db.Text
+  brand       String?
+  size        String?
+  color       String?
+  createdAt   DateTime @default(now())
+
+  photos Photo[]
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  filename  String
+  createdAt DateTime @default(now())
+
+  itemId Int
+  item   VintedItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
