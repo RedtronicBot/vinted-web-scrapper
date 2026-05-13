@@ -24,6 +24,10 @@ export class CreateItemDto {
 
   @IsArray()
   photos: PhotoDto[];
+
+  @IsArray()
+  @IsString({ each: true })
+  category: string[];
 }
 
 export class PhotoDto {

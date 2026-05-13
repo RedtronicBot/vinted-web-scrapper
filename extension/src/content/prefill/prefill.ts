@@ -1,5 +1,5 @@
 import { waitForElement } from "../utils/dom"
-import { fillPhotos, fillReactInput, fillReactTextarea } from "./fillInputs"
+import { fillCategory, fillPhotos, fillReactInput, fillReactTextarea } from "./fillInputs"
 import type { VintedItem } from "../../types"
 
 export const setPrefill = (item: VintedItem) => chrome.storage.local.set({ pendingPrefill: item })
@@ -16,6 +16,7 @@ export function handlePrefill() {
 			fillReactInput('[data-testid="price-input--input"]', String(pendingPrefill.price))
 			fillReactTextarea('textarea[name="description"]', pendingPrefill.description ?? "")
 			await fillPhotos(pendingPrefill.photos)
+			await fillCategory(pendingPrefill.category)
 			clearPrefill()
 		})
 	})

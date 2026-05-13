@@ -17,9 +17,9 @@ model VintedItem {
   brand       String?
   size        String?
   color       String?
+  category    Json
   createdAt   DateTime @default(now())
-
-  photos Photo[]
+  photos      Photo[]
 }
 
 model Photo {

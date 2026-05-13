@@ -29,6 +29,14 @@ export async function renderStoredItems() {
 			republish(item)
 		})
 	})
+
+	list.querySelectorAll(".vr-delete-btn").forEach((btn) => {
+		btn.addEventListener("click", async () => {
+			const id = +(btn as HTMLElement).dataset.id!
+			await api.deleteItem(id)
+			await renderStoredItems()
+		})
+	})
 }
 
 function renderItem(item: VintedItem) {
@@ -40,8 +48,11 @@ function renderItem(item: VintedItem) {
         <p style="margin:0;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.title}</p>
         <p style="margin:0;font-size:11px;color:#888;">${item.price}</p>
       </div>
-      <button data-id="${item.id}" class="vr-republish-btn" style="background:#09b1ba;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">
+      <button data-id="${item.id}" class="vr-republish-btn" style="background:#09b1ba;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
         Republier
+      </button>
+			<button data-id="${item.id}" class="vr-delete-btn" style="background:none;border:none;cursor:pointer;font-size:14px;padding:4px;" title="Supprimer">
+          🗑️
       </button>
     </div>
   `

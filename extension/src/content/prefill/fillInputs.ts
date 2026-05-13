@@ -25,6 +25,9 @@ export function fillReactTextarea(selector: string, value: string) {
 
 export async function fillPhotos(photos: Photo[]) {
 	const sortedPhotos = [...photos].sort((a, b) => a.position - b.position)
+	if (sortedPhotos.length > 1) {
+		;[sortedPhotos[0], sortedPhotos[sortedPhotos.length - 1]] = [sortedPhotos[sortedPhotos.length - 1], sortedPhotos[0]]
+	}
 	const files = await Promise.all(
 		sortedPhotos.map(async ({ filename }) => {
 			const url = `${import.meta.env.VITE_API_URL}/uploads/${filename}`
@@ -39,14 +42,13 @@ export async function fillPhotos(photos: Photo[]) {
 
 	const input = document.querySelector<HTMLInputElement>('input[type="file"]')
 	if (!input) {
-		console.error("❌ Input file introuvable")
+		console.error("Input file introuvable")
 		return
 	}
 
 	const dataTransfer = new DataTransfer()
 	validFiles.forEach((file) => dataTransfer.items.add(file))
 
-	// Setter natif React
 	const nativeInputValueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "files")?.set
 	if (nativeInputValueSetter) {
 		nativeInputValueSetter.call(input, dataTransfer.files)
@@ -55,4 +57,39 @@ export async function fillPhotos(photos: Photo[]) {
 	}
 
 	input.dispatchEvent(new Event("change", { bubbles: true }))
+}
+
+export async function fillCategory(category: string[]) {
+	const trigger = document.querySelector<HTMLElement>('[data-testid="catalog-select-dropdown-input"]')
+	if (!trigger) {
+		console.error("Dropdown catégorie introuvable")
+		return
+	}
+	trigger.click()
+
+	for (const label of category) {
+		const cell = await waitForCellWithText(label)
+		if (!cell) {
+			console.error(`Catégorie introuvable : ${label}`)
+			return
+		}
+		cell.click()
+	}
+}
+
+async function waitForCellWithText(text: string): Promise<HTMLElement | null> {
+	return new Promise((resolve) => {
+		const interval = setInterval(() => {
+			const cells = Array.from(document.querySelectorAll(".web_ui__Cell__title"))
+			const cell = cells.find((el) => el.textContent?.trim() === text)
+			if (cell) {
+				clearInterval(interval)
+				resolve((cell.closest('[role="button"]') as HTMLElement) ?? (cell as HTMLElement))
+			}
+		}, 300)
+		setTimeout(() => {
+			clearInterval(interval)
+			resolve(null)
+		}, 5000)
+	})
 }

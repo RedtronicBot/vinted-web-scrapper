@@ -17,6 +17,7 @@ export interface VintedItem {
 	color: string
 	createdAt?: string
 	photos: Photo[]
+	category: string[]
 }
 
 export type VintedItemPayload = Omit<VintedItem, "id" | "createdAt" | "photos"> & {
