@@ -15,6 +15,7 @@ export async function fetchArticleDetails(
 	const brand = doc.querySelector('[itemprop="name"]')?.textContent ?? ""
 	const size = doc.querySelector('[data-testid="item-attributes-size"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
 	const color = doc.querySelector('[data-testid="item-attributes-color"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
+	const material = doc.querySelector('[data-testid="item-attributes-material"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
 	const photosMap = new Map<number, { src: string; position: number }>()
 
 	Array.from(doc.querySelectorAll("figure[class*='item-photo--']")).forEach((figure) => {
@@ -36,5 +37,5 @@ export async function fetchArticleDetails(
 		.slice(1, -1)
 		.map((item) => item.querySelector("span")?.textContent?.trim() ?? "")
 		.filter(Boolean)
-	return { title, price, status, description, brand, size, color, photos, category }
+	return { title, price, status, description, brand, size, color, photos, category, material }
 }
