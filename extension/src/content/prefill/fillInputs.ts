@@ -1,3 +1,5 @@
+import type { Photo } from "../../types"
+
 export function fillReactInput(selector: string, value: string) {
 	const el = document.querySelector<HTMLInputElement>(selector)
 	if (!el) return
@@ -21,12 +23,10 @@ export function fillReactTextarea(selector: string, value: string) {
 	el.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
-export async function fillPhotos(photos: { filename: string }[]) {
-	const dropzone = document.querySelector('[data-testid="dropzone-overlay"]')?.parentElement
-	if (!dropzone) return
-
+export async function fillPhotos(photos: Photo[]) {
+	const sortedPhotos = [...photos].sort((a, b) => a.position - b.position)
 	const files = await Promise.all(
-		photos.map(async ({ filename }) => {
+		sortedPhotos.map(async ({ filename }) => {
 			const url = `${import.meta.env.VITE_API_URL}/uploads/${filename}`
 			const res = await fetch(url)
 			const blob = await res.blob()
@@ -34,15 +34,25 @@ export async function fillPhotos(photos: { filename: string }[]) {
 		}),
 	)
 
-	const dataTransfer = new DataTransfer()
-	files.forEach((file) => dataTransfer.items.add(file))
+	const validFiles = files.filter(Boolean) as File[]
+	if (validFiles.length === 0) return
 
-	dropzone.dispatchEvent(new DragEvent("dragenter", { bubbles: true }))
-	dropzone.dispatchEvent(new DragEvent("dragover", { bubbles: true }))
-	dropzone.dispatchEvent(
-		new DragEvent("drop", {
-			bubbles: true,
-			dataTransfer,
-		}),
-	)
+	const input = document.querySelector<HTMLInputElement>('input[type="file"]')
+	if (!input) {
+		console.error("❌ Input file introuvable")
+		return
+	}
+
+	const dataTransfer = new DataTransfer()
+	validFiles.forEach((file) => dataTransfer.items.add(file))
+
+	// Setter natif React
+	const nativeInputValueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "files")?.set
+	if (nativeInputValueSetter) {
+		nativeInputValueSetter.call(input, dataTransfer.files)
+	} else {
+		Object.defineProperty(input, "files", { value: dataTransfer.files, writable: true })
+	}
+
+	input.dispatchEvent(new Event("change", { bubbles: true }))
 }

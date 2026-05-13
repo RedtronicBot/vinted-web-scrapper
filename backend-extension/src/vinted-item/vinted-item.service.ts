@@ -9,13 +9,16 @@ import { CreateItemDto } from './dto/createItem.dto';
 export class VintedItemService {
   constructor(private readonly prisma: PrismaService) {}
   async create(dto: CreateItemDto) {
-    const filenames = await this.downloadPhotos(dto.photos);
+    const photos = await this.downloadPhotos(dto.photos);
     return this.prisma.vintedItem.create({
       data: {
         ...dto,
         price: parseFloat(dto.price),
         photos: {
-          create: filenames.map((filename) => ({ filename })),
+          create: photos.map(({ filename, position }) => ({
+            filename,
+            position,
+          })),
         },
       },
       include: { photos: true },
@@ -46,20 +49,22 @@ export class VintedItemService {
     // Le cascade s'occupe de supprimer les Photo en base
     return this.prisma.vintedItem.delete({ where: { id } });
   }
-  private async downloadPhotos(urls: string[]): Promise<string[]> {
-    const paths: string[] = [];
-    for (const url of urls) {
+  private async downloadPhotos(
+    photos: { src: string; position: number }[],
+  ): Promise<{ filename: string; position: number }[]> {
+    const results: { filename: string; position: number }[] = [];
+    for (const { src, position } of photos) {
       try {
-        const res = await fetch(url);
+        const res = await fetch(src);
         const buffer = Buffer.from(await res.arrayBuffer());
-        const ext = url.split('.').pop()?.split('?')[0] ?? 'jpg';
+        const ext = src.split('.').pop()?.split('?')[0] ?? 'jpg';
         const filename = `${randomUUID()}.${ext}`;
         await fs.writeFile(path.join('./uploads', filename), buffer);
-        paths.push(filename);
+        results.push({ filename, position });
       } catch {
-        // on skippe si une image échoue
+        // on skippe
       }
     }
-    return paths;
+    return results;
   }
 }

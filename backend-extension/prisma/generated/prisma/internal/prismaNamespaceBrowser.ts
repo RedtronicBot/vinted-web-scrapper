@@ -89,6 +89,7 @@ export type VintedItemScalarFieldEnum = (typeof VintedItemScalarFieldEnum)[keyof
 export const PhotoScalarFieldEnum = {
   id: 'id',
   filename: 'filename',
+  position: 'position',
   createdAt: 'createdAt',
   itemId: 'itemId'
 } as const

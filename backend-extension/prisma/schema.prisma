@@ -23,10 +23,10 @@ model VintedItem {
 }
 
 model Photo {
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   filename  String
-  createdAt DateTime @default(now())
-
-  itemId Int
-  item   VintedItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  position  Int
+  createdAt DateTime   @default(now())
+  itemId    Int
+  item      VintedItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
 }

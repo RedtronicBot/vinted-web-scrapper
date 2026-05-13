@@ -23,6 +23,10 @@ export class CreateItemDto {
   color: string;
 
   @IsArray()
-  @IsString({ each: true })
-  photos: string[];
+  photos: PhotoDto[];
+}
+
+export class PhotoDto {
+  src: string;
+  position: number;
 }

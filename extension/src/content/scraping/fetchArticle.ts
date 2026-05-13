@@ -1,6 +1,8 @@
 import type { VintedItem } from "../../types"
 
-export async function fetchArticleDetails(url: string): Promise<Omit<VintedItem, "id" | "createdAt" | "photos"> & { photos: string[] }> {
+export async function fetchArticleDetails(
+	url: string,
+): Promise<Omit<VintedItem, "id" | "createdAt" | "photos"> & { photos: { src: string; position: number }[] }> {
 	const response = await fetch(url)
 	const html = await response.text()
 	const parser = new DOMParser()
@@ -13,6 +15,14 @@ export async function fetchArticleDetails(url: string): Promise<Omit<VintedItem,
 	const brand = doc.querySelector('[itemprop="name"]')?.textContent ?? ""
 	const size = doc.querySelector('[data-testid="item-attributes-size"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
 	const color = doc.querySelector('[data-testid="item-attributes-color"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
-	const photos = Array.from(doc.querySelectorAll(".item-photos img")).map((img) => (img as HTMLImageElement).src)
+	const photos = Array.from(doc.querySelectorAll(".item-photos img")).map((img) => {
+		const figure = img.closest("figure")
+		const positionClass = Array.from(figure?.classList ?? []).find((c) => /^item-photo--\d+$/.test(c))
+		const position = positionClass ? parseInt(positionClass.split("--")[1]) : 0
+		return {
+			src: (img as HTMLImageElement).src,
+			position,
+		}
+	})
 	return { title, price, status, description, brand, size, color, photos }
 }
