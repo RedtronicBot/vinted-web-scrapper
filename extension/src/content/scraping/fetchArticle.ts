@@ -7,7 +7,17 @@ export async function fetchArticleDetails(
 	const html = await response.text()
 	const parser = new DOMParser()
 	const doc = parser.parseFromString(html, "text/html")
-	const title = doc.querySelector("h1")?.textContent ?? ""
+	const titleRaw = doc.querySelector("h1")?.textContent ?? ""
+	const parts = titleRaw
+		.split("-")
+		.map((part) => part.trim())
+		.filter(Boolean)
+
+	let title = titleRaw
+
+	if (parts.length === 3) {
+		title = `${parts[0]} - ${parts[2]} - ${parts[1]}`
+	}
 	const rawPrice = doc.querySelector('[data-testid="item-price"]')?.textContent ?? ""
 	const price = rawPrice.replace(/[^\d,]/g, "").replace(",", ".")
 	const status = doc.querySelector('[itemprop="status"]')?.textContent ?? ""
@@ -30,12 +40,14 @@ export async function fetchArticleDetails(
 			photosMap.set(position, { src, position })
 		}
 	})
-
+	console.log("🚀 ~ fetchArticleDetails ~ photosMap:", photosMap)
 	const photos = Array.from(photosMap.values()).sort((a, b) => a.position - b.position)
 	const breadcrumbItems = Array.from(doc.querySelectorAll(".breadcrumbs__item"))
-	const category = breadcrumbItems
-		.slice(1, -1)
-		.map((item) => item.querySelector("span")?.textContent?.trim() ?? "")
-		.filter(Boolean)
+
+	const breadcrumbTexts = breadcrumbItems.map((item) => item.querySelector("span")?.textContent?.trim() ?? "")
+
+	const startsWithAccueil = breadcrumbTexts[0]?.toLowerCase() === "accueil"
+
+	const category = breadcrumbTexts.slice(startsWithAccueil ? 1 : 0, -1).filter(Boolean)
 	return { title, price, status, description, brand, size, color, photos, category, material }
 }
