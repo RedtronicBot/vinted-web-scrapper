@@ -246,6 +246,7 @@ export async function fillColor(color: string) {
 
 		await new Promise((resolve) => setTimeout(resolve, 200))
 	}
+	clickOutside()
 }
 
 export async function fillMaterial(material: string) {
@@ -274,4 +275,33 @@ export async function fillMaterial(material: string) {
 		btn?.click()
 		await new Promise((resolve) => setTimeout(resolve, 200))
 	}
+	clickOutside()
+}
+
+function clickOutside() {
+	const body = document.body
+
+	body.dispatchEvent(
+		new MouseEvent("mousedown", {
+			bubbles: true,
+			cancelable: true,
+			view: window,
+		}),
+	)
+
+	body.dispatchEvent(
+		new MouseEvent("mouseup", {
+			bubbles: true,
+			cancelable: true,
+			view: window,
+		}),
+	)
+
+	body.dispatchEvent(
+		new MouseEvent("click", {
+			bubbles: true,
+			cancelable: true,
+			view: window,
+		}),
+	)
 }
