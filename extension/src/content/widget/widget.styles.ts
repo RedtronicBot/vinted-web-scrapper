@@ -1,9 +1,9 @@
 export function injectStyles() {
-  if (document.getElementById("vr-styles")) return
+	if (document.getElementById("vr-styles")) return
 
-  const style = document.createElement("style")
-  style.id = "vr-styles"
-  style.textContent = `
+	const style = document.createElement("style")
+	style.id = "vr-styles"
+	style.textContent = `
     #vr-widget {
       position: fixed;
       bottom: 24px;
@@ -55,6 +55,19 @@ export function injectStyles() {
       z-index: 9999;
       accent-color: #09b1ba;
     }
+
+    .vr-checkbox-overlay {
+	    position: absolute;
+	    inset: 0;
+	    z-index: 10;
+	    cursor: pointer;
+    }
+
+    .vr-selected {
+	    outline: 3px solid #09b1ba;
+	    outline-offset: 2px;
+	    border-radius: 8px;
+    }
   `
-  document.head.appendChild(style)
+	document.head.appendChild(style)
 }

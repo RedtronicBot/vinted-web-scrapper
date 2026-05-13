@@ -26,6 +26,10 @@ export async function finishSelection() {
 		)
 
 		document.querySelectorAll(".vr-checkbox").forEach((el) => el.remove())
+		document.querySelectorAll(".vr-checkbox-overlay").forEach((el) => el.remove())
+		document.querySelectorAll(".vr-selected").forEach((el) => {
+			el.classList.remove("vr-selected")
+		})
 
 		selectionMode = false
 		selectedArticle.clear()

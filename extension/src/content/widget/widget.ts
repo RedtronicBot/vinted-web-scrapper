@@ -16,6 +16,7 @@ export function setWidgetMode(mode: WidgetMode) {
 			btn.disabled = false
 			btn.style.opacity = "1"
 			btn.style.cursor = "pointer"
+			btn.style.background = "#09b1ba"
 			break
 
 		case "selection":
