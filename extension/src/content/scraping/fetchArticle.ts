@@ -21,7 +21,8 @@ export async function fetchArticleDetails(
 	const status = doc.querySelector('[itemprop="status"]')?.textContent ?? ""
 	const description = doc.querySelector('[itemprop="description"]')?.textContent ?? ""
 	const brand = doc.querySelector('[itemprop="name"]')?.textContent ?? ""
-	const dimensionsRaw = doc.querySelector('[data-testid="item-attributes-size"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
+	const dimensionsRaw =
+		doc.querySelector('[data-testid="item-attributes-measurements"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
 	const dimensionMatch = dimensionsRaw.match(/l\s*(\d+)\s*cm\s*\/\s*L\s*(\d+)\s*cm/i)
 	const dimensions = dimensionMatch ? { width: dimensionMatch[1], length: dimensionMatch[2] } : null
 	const size = doc.querySelector('[data-testid="item-attributes-size"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
