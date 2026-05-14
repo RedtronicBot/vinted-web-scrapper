@@ -73,6 +73,7 @@ export type VintedItemCountAggregateOutputType = {
   color: number
   material: number
   category: number
+  dimensions: number
   createdAt: number
   _all: number
 }
@@ -125,6 +126,7 @@ export type VintedItemCountAggregateInputType = {
   color?: true
   material?: true
   category?: true
+  dimensions?: true
   createdAt?: true
   _all?: true
 }
@@ -226,6 +228,7 @@ export type VintedItemGroupByOutputType = {
   color: string | null
   material: string | null
   category: runtime.JsonValue
+  dimensions: runtime.JsonValue | null
   createdAt: Date
   _count: VintedItemCountAggregateOutputType | null
   _avg: VintedItemAvgAggregateOutputType | null
@@ -263,6 +266,7 @@ export type VintedItemWhereInput = {
   color?: Prisma.StringNullableFilter<"VintedItem"> | string | null
   material?: Prisma.StringNullableFilter<"VintedItem"> | string | null
   category?: Prisma.JsonFilter<"VintedItem">
+  dimensions?: Prisma.JsonNullableFilter<"VintedItem">
   createdAt?: Prisma.DateTimeFilter<"VintedItem"> | Date | string
   photos?: Prisma.PhotoListRelationFilter
 }
@@ -278,6 +282,7 @@ export type VintedItemOrderByWithRelationInput = {
   color?: Prisma.SortOrderInput | Prisma.SortOrder
   material?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrder
+  dimensions?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   photos?: Prisma.PhotoOrderByRelationAggregateInput
   _relevance?: Prisma.VintedItemOrderByRelevanceInput
@@ -297,6 +302,7 @@ export type VintedItemWhereUniqueInput = Prisma.AtLeast<{
   color?: Prisma.StringNullableFilter<"VintedItem"> | string | null
   material?: Prisma.StringNullableFilter<"VintedItem"> | string | null
   category?: Prisma.JsonFilter<"VintedItem">
+  dimensions?: Prisma.JsonNullableFilter<"VintedItem">
   createdAt?: Prisma.DateTimeFilter<"VintedItem"> | Date | string
   photos?: Prisma.PhotoListRelationFilter
 }, "id">
@@ -312,6 +318,7 @@ export type VintedItemOrderByWithAggregationInput = {
   color?: Prisma.SortOrderInput | Prisma.SortOrder
   material?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrder
+  dimensions?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.VintedItemCountOrderByAggregateInput
   _avg?: Prisma.VintedItemAvgOrderByAggregateInput
@@ -334,6 +341,7 @@ export type VintedItemScalarWhereWithAggregatesInput = {
   color?: Prisma.StringNullableWithAggregatesFilter<"VintedItem"> | string | null
   material?: Prisma.StringNullableWithAggregatesFilter<"VintedItem"> | string | null
   category?: Prisma.JsonWithAggregatesFilter<"VintedItem">
+  dimensions?: Prisma.JsonNullableWithAggregatesFilter<"VintedItem">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"VintedItem"> | Date | string
 }
 
@@ -347,6 +355,7 @@ export type VintedItemCreateInput = {
   color?: string | null
   material?: string | null
   category: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   photos?: Prisma.PhotoCreateNestedManyWithoutItemInput
 }
@@ -362,6 +371,7 @@ export type VintedItemUncheckedCreateInput = {
   color?: string | null
   material?: string | null
   category: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   photos?: Prisma.PhotoUncheckedCreateNestedManyWithoutItemInput
 }
@@ -376,6 +386,7 @@ export type VintedItemUpdateInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   material?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.PhotoUpdateManyWithoutItemNestedInput
 }
@@ -391,6 +402,7 @@ export type VintedItemUncheckedUpdateInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   material?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   photos?: Prisma.PhotoUncheckedUpdateManyWithoutItemNestedInput
 }
@@ -406,6 +418,7 @@ export type VintedItemCreateManyInput = {
   color?: string | null
   material?: string | null
   category: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -419,6 +432,7 @@ export type VintedItemUpdateManyMutationInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   material?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -433,6 +447,7 @@ export type VintedItemUncheckedUpdateManyInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   material?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -453,6 +468,7 @@ export type VintedItemCountOrderByAggregateInput = {
   color?: Prisma.SortOrder
   material?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  dimensions?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -549,6 +565,7 @@ export type VintedItemCreateWithoutPhotosInput = {
   color?: string | null
   material?: string | null
   category: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -563,6 +580,7 @@ export type VintedItemUncheckedCreateWithoutPhotosInput = {
   color?: string | null
   material?: string | null
   category: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -592,6 +610,7 @@ export type VintedItemUpdateWithoutPhotosInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   material?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -606,6 +625,7 @@ export type VintedItemUncheckedUpdateWithoutPhotosInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   material?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  dimensions?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -651,6 +671,7 @@ export type VintedItemSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   color?: boolean
   material?: boolean
   category?: boolean
+  dimensions?: boolean
   createdAt?: boolean
   photos?: boolean | Prisma.VintedItem$photosArgs<ExtArgs>
   _count?: boolean | Prisma.VintedItemCountOutputTypeDefaultArgs<ExtArgs>
@@ -669,10 +690,11 @@ export type VintedItemSelectScalar = {
   color?: boolean
   material?: boolean
   category?: boolean
+  dimensions?: boolean
   createdAt?: boolean
 }
 
-export type VintedItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "price" | "status" | "description" | "brand" | "size" | "color" | "material" | "category" | "createdAt", ExtArgs["result"]["vintedItem"]>
+export type VintedItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "price" | "status" | "description" | "brand" | "size" | "color" | "material" | "category" | "dimensions" | "createdAt", ExtArgs["result"]["vintedItem"]>
 export type VintedItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   photos?: boolean | Prisma.VintedItem$photosArgs<ExtArgs>
   _count?: boolean | Prisma.VintedItemCountOutputTypeDefaultArgs<ExtArgs>
@@ -694,6 +716,7 @@ export type $VintedItemPayload<ExtArgs extends runtime.Types.Extensions.Internal
     color: string | null
     material: string | null
     category: runtime.JsonValue
+    dimensions: runtime.JsonValue | null
     createdAt: Date
   }, ExtArgs["result"]["vintedItem"]>
   composites: {}
@@ -1075,6 +1098,7 @@ export interface VintedItemFieldRefs {
   readonly color: Prisma.FieldRef<"VintedItem", 'String'>
   readonly material: Prisma.FieldRef<"VintedItem", 'String'>
   readonly category: Prisma.FieldRef<"VintedItem", 'Json'>
+  readonly dimensions: Prisma.FieldRef<"VintedItem", 'Json'>
   readonly createdAt: Prisma.FieldRef<"VintedItem", 'DateTime'>
 }
     
