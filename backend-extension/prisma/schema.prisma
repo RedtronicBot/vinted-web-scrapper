@@ -19,6 +19,7 @@ model VintedItem {
   color       String?
   material    String?
   category    Json
+  dimensions  Json?
   createdAt   DateTime @default(now())
   photos      Photo[]
 }

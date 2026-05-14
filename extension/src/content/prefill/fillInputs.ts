@@ -305,3 +305,15 @@ function clickOutside() {
 		}),
 	)
 }
+
+export async function fillDimensions(dimensions?: { width: string; length: string } | null) {
+	if (!dimensions) return
+
+	if (dimensions.width) {
+		fillReactInput('[data-testid="measurement-width--input"]', dimensions.width)
+	}
+
+	if (dimensions.length) {
+		fillReactInput('[data-testid="measurement-length--input"]', dimensions.length)
+	}
+}

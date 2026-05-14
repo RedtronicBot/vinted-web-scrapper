@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
 			rollupOptions: {
 				input: {
 					content: resolve(__dirname, "src/content/index.ts"),
+					background: resolve(__dirname, "src/background.ts"),
 				},
 				output: {
 					entryFileNames: "[name].js",

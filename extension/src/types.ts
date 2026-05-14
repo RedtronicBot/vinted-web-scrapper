@@ -19,6 +19,7 @@ export interface VintedItem {
 	photos: Photo[]
 	category: string[]
 	material: string
+	dimensions?: { width: string; length: string } | null
 }
 
 export type VintedItemPayload = Omit<VintedItem, "id" | "createdAt" | "photos"> & {

@@ -4,6 +4,7 @@ import {
 	fillCategory,
 	fillColor,
 	fillCondition,
+	fillDimensions,
 	fillMaterial,
 	fillPhotos,
 	fillReactInput,
@@ -46,7 +47,7 @@ export function handlePrefill() {
 
 			await waitForElement('[data-testid="category-material-multi-list-input"]')
 			await fillMaterial(pendingPrefill.material ?? "")
-
+			await fillDimensions(pendingPrefill.dimensions)
 			await fillReactInput('[data-testid="price-input--input"]', String(pendingPrefill.price))
 			clearPrefill()
 		})

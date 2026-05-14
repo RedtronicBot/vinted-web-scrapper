@@ -17,13 +17,10 @@ export function startSelectionMode() {
 
 export async function finishSelection() {
 	try {
-		await Promise.all(
-			[...selectedArticle].map(async (article) => {
-				const item = await fetchArticleDetails(article)
-
-				await api.saveItem(item)
-			}),
-		)
+		for (const article of selectedArticle) {
+			const item = await fetchArticleDetails(article)
+			await api.saveItem(item)
+		}
 
 		document.querySelectorAll(".vr-checkbox").forEach((el) => el.remove())
 		document.querySelectorAll(".vr-checkbox-overlay").forEach((el) => el.remove())
