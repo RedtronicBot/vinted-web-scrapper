@@ -20,6 +20,8 @@ export interface VintedItem {
 	category: string[]
 	material: string
 	dimensions?: { width: string; length: string } | null
+	reuploadAt: string
+	sourceUrl: string
 }
 
 export type VintedItemPayload = Omit<VintedItem, "id" | "createdAt" | "photos"> & {

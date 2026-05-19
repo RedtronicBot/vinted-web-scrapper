@@ -9,19 +9,21 @@ datasource db {
 }
 
 model VintedItem {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
-  price       Decimal  @db.Decimal(10, 2)
+  price       Decimal   @db.Decimal(10, 2)
   status      String?
-  description String?  @db.Text
+  description String?   @db.Text
   brand       String?
   size        String?
   color       String?
   material    String?
   category    Json
   dimensions  Json?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   photos      Photo[]
+  reuploadAt  DateTime?
+  sourceUrl   String?
 }
 
 model Photo {

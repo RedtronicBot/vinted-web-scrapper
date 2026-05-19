@@ -22,6 +22,12 @@ export function injectStyles() {
       min-width: 180px;
     }
 
+    #vr-list {
+      max-height: 300px;
+      overflow-y: auto;
+      width: 100%;
+    }
+
     #vr-widget-label {
       font-size: 12px;
       color: #888;
@@ -43,30 +49,6 @@ export function injectStyles() {
 
     #vr-widget-btn:hover {
       background: #07959d;
-    }
-
-    .vr-checkbox {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      width: 20px;
-      height: 20px;
-      cursor: pointer;
-      z-index: 9999;
-      accent-color: #09b1ba;
-    }
-
-    .vr-checkbox-overlay {
-	    position: absolute;
-	    inset: 0;
-	    z-index: 10;
-	    cursor: pointer;
-    }
-
-    .vr-selected {
-	    outline: 3px solid #09b1ba;
-	    outline-offset: 2px;
-	    border-radius: 8px;
     }
   `
 	document.head.appendChild(style)

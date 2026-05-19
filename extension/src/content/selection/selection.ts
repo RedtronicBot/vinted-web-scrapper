@@ -1,44 +1,33 @@
 import { fetchArticleDetails } from "../scraping/fetchArticle"
 import { renderStoredItems } from "../widget/widget.render"
-import { injectCheckboxes } from "./checkboxes"
-import { api } from "../api/api"
 
-let selectionMode = false
+import { api } from "../api/api"
 
 export const selectedArticle = new Set<string>()
 
-export function startSelectionMode() {
-	if (selectionMode) return
-
-	selectionMode = true
-
-	injectCheckboxes()
-}
-
 export async function finishSelection() {
+	// Collecte automatiquement tous les articles visibles
+	const cards = document.querySelectorAll<HTMLElement>('[data-testid^="product-item-id-"]')
+	const existingUrls = await api.getUrls()
+	cards.forEach((card) => {
+		const link = card.querySelector<HTMLAnchorElement>("a")
+		if (link?.href && !existingUrls.includes(link.href)) {
+			selectedArticle.add(link.href)
+		}
+	})
+
 	try {
 		for (const article of selectedArticle) {
 			const item = await fetchArticleDetails(article)
 			await api.saveItem(item)
+			await new Promise((resolve) => setTimeout(resolve, 5000))
 		}
-
-		document.querySelectorAll(".vr-checkbox").forEach((el) => el.remove())
-		document.querySelectorAll(".vr-checkbox-overlay").forEach((el) => el.remove())
-		document.querySelectorAll(".vr-selected").forEach((el) => {
-			el.classList.remove("vr-selected")
-		})
-
-		selectionMode = false
 		selectedArticle.clear()
-
 		const label = document.getElementById("vr-widget-label")!
-
 		label.textContent = "Vinted Reupload"
-
 		await renderStoredItems()
 	} catch (error) {
 		console.error("Erreur sauvegarde :", error)
-
 		throw error
 	}
 }

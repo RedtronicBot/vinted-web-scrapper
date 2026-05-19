@@ -1,36 +1,40 @@
-import { IsArray, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from "class-validator"
 
 export class CreateItemDto {
   @IsString()
-  title: string;
+  title: string
 
   @IsString()
-  price: string;
+  price: string
 
   @IsString()
-  status: string;
+  status: string
 
   @IsString()
-  description: string;
+  description: string
 
   @IsString()
-  brand: string;
+  brand: string
 
   @IsString()
-  size: string;
+  size: string
 
   @IsString()
-  color: string;
+  color: string
 
   @IsArray()
-  photos: PhotoDto[];
+  photos: PhotoDto[]
 
   @IsArray()
   @IsString({ each: true })
-  category: string[];
+  category: string[]
+
+  @IsOptional()
+  @IsString()
+  reuploadAt?: string
 }
 
 export class PhotoDto {
-  src: string;
-  position: number;
+  src: string
+  position: number
 }

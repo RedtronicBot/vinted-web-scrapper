@@ -12,6 +12,7 @@ import {
 	fillSize,
 } from "./fillInputs"
 import type { VintedItem } from "../../types"
+import { api } from "../api/api"
 
 export const setPrefill = (item: VintedItem) => chrome.storage.local.set({ pendingPrefill: item })
 
@@ -50,6 +51,12 @@ export function handlePrefill() {
 			await fillDimensions(pendingPrefill.dimensions)
 			await fillReactInput('[data-testid="price-input--input"]', String(pendingPrefill.price))
 			clearPrefill()
+			const draftBtn = await waitForElement<HTMLElement>('[data-testid="upload-form-save-draft-button"]')
+			draftBtn.click()
+
+			if (pendingPrefill.id) {
+				await api.deleteItem(pendingPrefill.id)
+			}
 		})
 	})
 }

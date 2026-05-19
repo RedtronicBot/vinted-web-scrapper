@@ -1,4 +1,4 @@
-import { finishSelection, startSelectionMode } from "../selection/selection"
+import { finishSelection } from "../selection/selection"
 import { renderStoredItems } from "./widget.render"
 
 type WidgetMode = "idle" | "selection" | "loading"
@@ -12,19 +12,11 @@ export function setWidgetMode(mode: WidgetMode) {
 
 	switch (mode) {
 		case "idle":
-			btn.textContent = "+ Ajouter un article"
+			btn.textContent = "Ajouter les articles"
 			btn.disabled = false
 			btn.style.opacity = "1"
 			btn.style.cursor = "pointer"
 			btn.style.background = "#09b1ba"
-			break
-
-		case "selection":
-			btn.textContent = "✓ Terminer la sélection"
-			btn.disabled = false
-			btn.style.opacity = "1"
-			btn.style.cursor = "pointer"
-			btn.style.background = "#1a1a1a"
 			break
 
 		case "loading":
@@ -56,23 +48,16 @@ export function initWidget() {
 
 	btn.addEventListener("click", async () => {
 		const mode = btn.dataset.mode as WidgetMode
-
 		if (mode === "loading") return
 
-		if (mode === "selection") {
-			setWidgetMode("loading")
-
-			try {
-				await finishSelection()
-				await renderStoredItems()
-				setWidgetMode("idle")
-			} catch (e) {
-				console.error(e)
-				setWidgetMode("selection")
-			}
-		} else {
-			startSelectionMode()
-			setWidgetMode("selection")
+		setWidgetMode("loading")
+		try {
+			await finishSelection()
+			await renderStoredItems()
+			setWidgetMode("idle")
+		} catch (e) {
+			console.error(e)
+			setWidgetMode("idle")
 		}
 	})
 }

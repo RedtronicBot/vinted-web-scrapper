@@ -4,7 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
 	const res = await fetch(`${API_URL}${path}`, {
-		headers: { "Content-Type": "application/json" },
+		headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
 		...options,
 	})
 	if (!res.ok) throw new Error(`API error ${res.status}`)
@@ -13,6 +13,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
 	getItems: () => request<VintedItem[]>("/items"),
+	getDueItems: () => request<VintedItem[]>("/items/due"),
+	getUrls: () => request<string[]>("/items/urls"),
 	saveItem: (item: VintedItemPayload) =>
 		request<VintedItem>("/items", {
 			method: "POST",

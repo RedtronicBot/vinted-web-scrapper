@@ -107,7 +107,7 @@ async function waitForCellWithText(text: string): Promise<HTMLElement | null> {
 
 export async function fillBrand(brand: string) {
 	// Attend que le dropdown marque soit présent (affiché seulement après catégorie)
-	const input = (await waitForElement('[data-testid="brand-select-dropdown-input"]')) as HTMLElement
+	const input = await waitForElement<HTMLElement>('[data-testid="brand-select-dropdown-input"]')
 	input.click()
 
 	await waitForElement('[data-testid="brand-select-dropdown-content"]')
@@ -162,7 +162,7 @@ function findAndClickBrand(brand: string): boolean {
 }
 
 export async function fillSize(size: string) {
-	const input = (await waitForElement('[data-testid^="category-size-"][data-testid$="-input"]')) as HTMLElement
+	const input = await waitForElement<HTMLElement>('[data-testid^="category-size-"][data-testid$="-input"]')
 
 	if (!input) {
 		console.warn("Input taille introuvable")
@@ -171,7 +171,7 @@ export async function fillSize(size: string) {
 
 	input.click()
 
-	const dropdown = (await waitForElement('[data-testid^="category-size-"][data-testid$="-content"]')) as HTMLElement
+	const dropdown = await waitForElement<HTMLElement>('[data-testid^="category-size-"][data-testid$="-content"]')
 
 	if (!dropdown) {
 		console.warn("Dropdown taille introuvable")
@@ -202,7 +202,7 @@ export async function fillSize(size: string) {
 }
 
 export async function fillCondition(status: string) {
-	const input = (await waitForElement('[data-testid="category-condition-single-list-input"]')) as HTMLElement
+	const input = await waitForElement<HTMLElement>('[data-testid="category-condition-single-list-input"]')
 	input.click()
 
 	await waitForElement('[data-testid="category-condition-single-list-content"]')
@@ -221,7 +221,7 @@ export async function fillCondition(status: string) {
 }
 
 export async function fillColor(color: string) {
-	const input = (await waitForElement('[data-testid="color-select-dropdown-input"]')) as HTMLElement
+	const input = await waitForElement<HTMLElement>('[data-testid="color-select-dropdown-input"]')
 	input.click()
 
 	await waitForElement('[data-testid="color-select-dropdown-content"]')
@@ -252,7 +252,7 @@ export async function fillColor(color: string) {
 export async function fillMaterial(material: string) {
 	if (!material) return
 
-	const input = (await waitForElement('[data-testid="category-material-multi-list-input"]')) as HTMLElement
+	const input = await waitForElement<HTMLElement>('[data-testid="category-material-multi-list-input"]')
 	input.click()
 
 	await waitForElement('[data-testid="category-material-multi-list-content"]')

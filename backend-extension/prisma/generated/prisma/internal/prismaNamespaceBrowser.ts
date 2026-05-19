@@ -83,7 +83,9 @@ export const VintedItemScalarFieldEnum = {
   material: 'material',
   category: 'category',
   dimensions: 'dimensions',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  reuploadAt: 'reuploadAt',
+  sourceUrl: 'sourceUrl'
 } as const
 
 export type VintedItemScalarFieldEnum = (typeof VintedItemScalarFieldEnum)[keyof typeof VintedItemScalarFieldEnum]
@@ -155,7 +157,8 @@ export const VintedItemOrderByRelevanceFieldEnum = {
   brand: 'brand',
   size: 'size',
   color: 'color',
-  material: 'material'
+  material: 'material',
+  sourceUrl: 'sourceUrl'
 } as const
 
 export type VintedItemOrderByRelevanceFieldEnum = (typeof VintedItemOrderByRelevanceFieldEnum)[keyof typeof VintedItemOrderByRelevanceFieldEnum]

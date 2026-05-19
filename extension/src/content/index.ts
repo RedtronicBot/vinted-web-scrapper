@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	}
 })
 
-chrome.runtime.sendMessage({ type: "CONTENT_READY" })
+chrome.runtime.sendMessage({ type: "CONTENT_READY", url: window.location.href })
 
 // Le reste
 injectStyles()

@@ -7,7 +7,11 @@
 	"background": {
 		"service_worker": "background.js"
 	},
-	"host_permissions": ["https://www.vinted.fr/*", "https://extensionapi.redtrotool.fr/*"],
+	"host_permissions": [
+		"https://www.vinted.fr/*",
+		"https://extensionapi.redtrotool.fr/*",
+		"https://efbc-2a01-cb00-502-ad00-b8ba-d56f-f93d-9e8.ngrok-free.app/*"
+	],
 	"content_scripts": [
 		{
 			"matches": ["https://www.vinted.fr/*"],

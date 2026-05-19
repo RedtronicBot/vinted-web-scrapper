@@ -33,5 +33,48 @@ export async function fetchArticleDetails(
 	const breadcrumbTexts = breadcrumbItems.map((item) => item.querySelector("span")?.textContent?.trim() ?? "")
 	const startsWithAccueil = breadcrumbTexts[0]?.toLowerCase() === "accueil"
 	const category = breadcrumbTexts.slice(startsWithAccueil ? 1 : 0, -1).filter(Boolean)
-	return { title, price, status, description, brand, size, color, photos, category, material, dimensions }
+	const uploadDateRaw = doc.querySelector('[itemprop="upload_date"] span')?.textContent?.trim() ?? ""
+	const reuploadAt = parseReuploadAt(uploadDateRaw)
+	return {
+		title,
+		price,
+		status,
+		description,
+		brand,
+		size,
+		color,
+		photos,
+		category,
+		material,
+		dimensions,
+		reuploadAt: reuploadAt.toISOString(),
+		sourceUrl: url,
+	}
+}
+
+function parseReuploadAt(text: string): Date {
+	const now = new Date()
+	const midnight = new Date(now)
+	midnight.setHours(0, 0, 0, 0)
+
+	// "Il y a X jours" / "Il y a X semaines" / "Il y a X mois"
+	const daysMatch = text.match(/il y a (\d+) jour/i)
+	const weeksMatch = text.match(/il y a (\d+) semaine/i)
+	const monthsMatch = text.match(/il y a (\d+) mois/i)
+
+	let daysAgo = 0
+	if (daysMatch) daysAgo = parseInt(daysMatch[1])
+	else if (weeksMatch) daysAgo = parseInt(weeksMatch[1]) * 7
+	else if (monthsMatch) daysAgo = parseInt(monthsMatch[1]) * 30
+
+	if (daysAgo >= 7) {
+		// Déjà à réuploader — date d'aujourd'hui minuit
+		return midnight
+	}
+
+	// Calcule dans combien de jours (arrondi au supérieur)
+	const daysLeft = Math.ceil(7 - daysAgo)
+	const reuploadAt = new Date(midnight)
+	reuploadAt.setDate(midnight.getDate() + daysLeft)
+	return reuploadAt
 }
