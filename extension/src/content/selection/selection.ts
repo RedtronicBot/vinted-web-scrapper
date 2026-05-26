@@ -7,9 +7,13 @@ export const selectedArticle = new Set<string>()
 
 export async function finishSelection() {
 	// Collecte automatiquement tous les articles visibles
-	const cards = document.querySelectorAll<HTMLElement>('[data-testid^="product-item-id-"]')
+	const cards = [...document.querySelectorAll<HTMLElement>('[data-testid^="product-item-id-"]')].filter((el) => !el.dataset.testid?.includes("--"))
 	const existingUrls = await api.getUrls()
 	cards.forEach((card) => {
+		const statusElement = card.querySelector('[data-testid$="--status-text"]')
+		if (statusElement) {
+			return
+		}
 		const link = card.querySelector<HTMLAnchorElement>("a")
 		if (link?.href && !existingUrls.includes(link.href)) {
 			selectedArticle.add(link.href)

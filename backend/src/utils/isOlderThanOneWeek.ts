@@ -1,7 +1,7 @@
 export function isOlderThanOneWeek(text: string): boolean {
   const lower = text.toLowerCase()
 
-  const weeksMatch = lower.match(/il y a (\d+)\s*semaine/)
+  const weeksMatch = lower.match(/il y a\s+(\d+|une)\s+semaine[s]?/)
   if (weeksMatch) return true
 
   const monthsMatch = lower.match(/il y a (\d+)\s*mois/)

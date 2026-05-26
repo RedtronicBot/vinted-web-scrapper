@@ -9,7 +9,7 @@ export async function fetchArticleDetails(
 	const doc = parser.parseFromString(html, "text/html")
 	const titleRaw = doc.querySelector("h1")?.textContent ?? ""
 	const parts = titleRaw
-		.split("–")
+		.split(/\s*[–-]\s*/)
 		.map((part) => part.trim())
 		.filter(Boolean)
 	let title = titleRaw
@@ -54,8 +54,7 @@ export async function fetchArticleDetails(
 
 function parseReuploadAt(text: string): Date {
 	const now = new Date()
-	const midnight = new Date(now)
-	midnight.setHours(0, 0, 0, 0)
+	const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0))
 
 	// "Il y a X jours" / "Il y a X semaines" / "Il y a X mois"
 	const daysMatch = text.match(/il y a (\d+) jour/i)

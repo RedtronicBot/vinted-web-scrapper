@@ -191,10 +191,6 @@ export async function fillSize(size: string) {
 
 	if (!match) {
 		console.warn(`Taille introuvable : ${size}`)
-		console.log(
-			"Tailles disponibles :",
-			options.map((o) => o.getAttribute("aria-label") || o.textContent?.trim()),
-		)
 		return
 	}
 
