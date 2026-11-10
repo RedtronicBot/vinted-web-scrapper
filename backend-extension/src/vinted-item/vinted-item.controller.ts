@@ -1,5 +1,5 @@
 // items/items.controller.ts
-import { Controller, Get, Post, Delete, Body, Param } from "@nestjs/common"
+import { Controller, Get, Post, Delete, Body, Param, ParseIntPipe, NotFoundException } from "@nestjs/common"
 import { VintedItemService } from "./vinted-item.service"
 import { CreateItemDto } from "./dto/createItem.dto"
 
@@ -26,13 +26,16 @@ export class VintedItemController {
   findAllUrls() {
     return this.vintedItemService.findAllUrls()
   }
+
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.vintedItemService.findOne(+id)
+  async findOne(@Param("id", ParseIntPipe) id: number) {
+    const item = await this.vintedItemService.findOne(id)
+    if (!item) throw new NotFoundException()
+    return item
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.vintedItemService.remove(+id)
+  remove(@Param("id", ParseIntPipe) id: number) {
+    return this.vintedItemService.remove(id)
   }
 }

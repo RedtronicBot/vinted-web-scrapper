@@ -24,6 +24,7 @@ model VintedItem {
   photos      Photo[]
   reuploadAt  DateTime?
   sourceUrl   String?
+  notifiedAt  DateTime?
 }
 
 model Photo {

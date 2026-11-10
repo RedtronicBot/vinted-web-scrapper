@@ -55,16 +55,18 @@ export async function fetchArticleDetails(
 function parseReuploadAt(text: string): Date {
 	const now = new Date()
 	const midnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0))
-
+	if (!text) return midnight
 	// "Il y a X jours" / "Il y a X semaines" / "Il y a X mois"
 	const daysMatch = text.match(/il y a (\d+) jour/i)
-	const weeksMatch = text.match(/il y a (\d+) semaine/i)
+	const weeksMatch = text.match(/il y a\s+(\d+|une)\s+semaine[s]?/i)
 	const monthsMatch = text.match(/il y a (\d+) mois/i)
 
 	let daysAgo = 0
 	if (daysMatch) daysAgo = parseInt(daysMatch[1])
-	else if (weeksMatch) daysAgo = parseInt(weeksMatch[1]) * 7
-	else if (monthsMatch) daysAgo = parseInt(monthsMatch[1]) * 30
+	else if (weeksMatch) {
+		const val = weeksMatch[1]
+		daysAgo = val === "une" ? 7 : parseInt(val) * 7
+	} else if (monthsMatch) daysAgo = parseInt(monthsMatch[1]) * 30
 
 	if (daysAgo >= 7) {
 		// Déjà à réuploader — date d'aujourd'hui minuit
