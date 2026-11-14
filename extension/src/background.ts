@@ -10,15 +10,15 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 				// Active l'onglet pour que Vinted rende les images
 				chrome.tabs.update(tabId, { active: true }, () => {
 					setTimeout(() => {
-						chrome.tabs.sendMessage(tabId, { type: "GET_PHOTOS" }, (photos) => {
+						chrome.tabs.sendMessage(tabId, { type: "GET_PAGE_DATA" }, (data) => {
 							if (chrome.runtime.lastError) {
 								console.error("❌ Erreur:", chrome.runtime.lastError.message)
 								chrome.tabs.remove(tabId)
-								sendResponse({ photos: [] })
+								sendResponse({ photos: [], category: [] })
 								return
 							}
 							chrome.tabs.remove(tabId)
-							sendResponse({ photos })
+							sendResponse(data)
 						})
 					}, 5000)
 				})

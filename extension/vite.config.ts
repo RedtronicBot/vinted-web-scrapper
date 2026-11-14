@@ -8,14 +8,25 @@ export default defineConfig(({ mode }) => {
 	return {
 		plugins: [
 			viteStaticCopy({
-				targets: [{ src: "manifest.json", dest: "." }],
+				targets: [
+					{
+						src: "manifest.json",
+						dest: ".",
+						transform: (content) => {
+							if (mode !== "preproduction") return content
+							const manifest = JSON.parse(content.toString())
+							manifest.name = `${manifest.name} (preprod)`
+							return JSON.stringify(manifest, null, 2)
+						},
+					},
+				],
 			}),
 		],
 		define: {
 			"import.meta.env.VITE_API_URL": JSON.stringify(env.VITE_API_URL),
 		},
 		build: {
-			outDir: "dist",
+			outDir: mode === "preproduction" ? "dist-preprod" : "dist",
 			emptyOutDir: true,
 			rollupOptions: {
 				input: {

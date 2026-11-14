@@ -49,7 +49,7 @@ export class NotificationsService {
         topic: this.config.getOrThrow<string>("NTFY_TOPIC"),
         title: "Article à republier",
         message: title,
-        click: `https://www.vinted.fr/items/new#vr=${id}`,
+        click: `${this.config.getOrThrow<string>("VITE_API_URL")}/open/${id}`,
         tags: ["recycle"],
       }),
     })

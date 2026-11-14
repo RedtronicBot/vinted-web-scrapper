@@ -13,6 +13,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
 	getItems: () => request<VintedItem[]>("/items"),
+	getItem: (id: number) => request<VintedItem>(`/items/${id}`),
 	getDueItems: () => request<VintedItem[]>("/items/due"),
 	getUrls: () => request<string[]>("/items/urls"),
 	saveItem: (item: VintedItemPayload) =>

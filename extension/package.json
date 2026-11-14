@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite build --watch --mode development",
 		"build": "tsc && vite build --mode production",
+		"build:preprod": "tsc && vite build --mode preproduction",
 		"preview": "vite preview"
 	},
 	"devDependencies": {

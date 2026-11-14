@@ -1,4 +1,5 @@
 import type { VintedItem } from "../../types"
+import { extractCategory } from "./fetchCategory"
 
 export async function fetchArticleDetails(
 	url: string,
@@ -28,11 +29,9 @@ export async function fetchArticleDetails(
 	const size = doc.querySelector('[data-testid="item-attributes-size"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
 	const color = doc.querySelector('[data-testid="item-attributes-color"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
 	const material = doc.querySelector('[data-testid="item-attributes-material"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
-	const { photos } = await chrome.runtime.sendMessage({ type: "SCRAPE_ARTICLE", url })
-	const breadcrumbItems = Array.from(doc.querySelectorAll(".breadcrumbs__item"))
-	const breadcrumbTexts = breadcrumbItems.map((item) => item.querySelector("span")?.textContent?.trim() ?? "")
-	const startsWithAccueil = breadcrumbTexts[0]?.toLowerCase() === "accueil"
-	const category = breadcrumbTexts.slice(startsWithAccueil ? 1 : 0, -1).filter(Boolean)
+	const { photos, category: liveCategory } = await chrome.runtime.sendMessage({ type: "SCRAPE_ARTICLE", url })
+	const category: string[] = liveCategory?.length ? liveCategory : extractCategory(doc)
+	console.log("[Vinted Reupload] catégorie scrapée :", category, liveCategory?.length ? "(onglet)" : "(HTML)")
 	const uploadDateRaw = doc.querySelector('[itemprop="upload_date"] span')?.textContent?.trim() ?? ""
 	const reuploadAt = parseReuploadAt(uploadDateRaw)
 	return {
