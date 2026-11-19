@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">myvinted</string>
+    <string name="title_activity_main">myvinted</string>
+    <string name="package_name">com.myvinted.app</string>
+    <string name="custom_url_scheme">com.myvinted.app</string>
+</resources>

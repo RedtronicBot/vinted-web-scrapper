@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "655160884287",
+    "project_id": "evabotdiscord-59001",
+    "storage_bucket": "evabotdiscord-59001.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655160884287:android:571a21b2d53dfcdfa34c8a",
+        "android_client_info": {
+          "package_name": "com.myvinted.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIvFtkU6O1PSMMSpQPKBJ1LbVf2AH4Gyc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

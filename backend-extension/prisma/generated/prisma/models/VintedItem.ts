@@ -49,6 +49,7 @@ export type VintedItemMinAggregateOutputType = {
   createdAt: Date | null
   reuploadAt: Date | null
   sourceUrl: string | null
+  notifiedAt: Date | null
 }
 
 export type VintedItemMaxAggregateOutputType = {
@@ -64,6 +65,7 @@ export type VintedItemMaxAggregateOutputType = {
   createdAt: Date | null
   reuploadAt: Date | null
   sourceUrl: string | null
+  notifiedAt: Date | null
 }
 
 export type VintedItemCountAggregateOutputType = {
@@ -81,6 +83,7 @@ export type VintedItemCountAggregateOutputType = {
   createdAt: number
   reuploadAt: number
   sourceUrl: number
+  notifiedAt: number
   _all: number
 }
 
@@ -108,6 +111,7 @@ export type VintedItemMinAggregateInputType = {
   createdAt?: true
   reuploadAt?: true
   sourceUrl?: true
+  notifiedAt?: true
 }
 
 export type VintedItemMaxAggregateInputType = {
@@ -123,6 +127,7 @@ export type VintedItemMaxAggregateInputType = {
   createdAt?: true
   reuploadAt?: true
   sourceUrl?: true
+  notifiedAt?: true
 }
 
 export type VintedItemCountAggregateInputType = {
@@ -140,6 +145,7 @@ export type VintedItemCountAggregateInputType = {
   createdAt?: true
   reuploadAt?: true
   sourceUrl?: true
+  notifiedAt?: true
   _all?: true
 }
 
@@ -244,6 +250,7 @@ export type VintedItemGroupByOutputType = {
   createdAt: Date
   reuploadAt: Date | null
   sourceUrl: string | null
+  notifiedAt: Date | null
   _count: VintedItemCountAggregateOutputType | null
   _avg: VintedItemAvgAggregateOutputType | null
   _sum: VintedItemSumAggregateOutputType | null
@@ -284,6 +291,7 @@ export type VintedItemWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"VintedItem"> | Date | string
   reuploadAt?: Prisma.DateTimeNullableFilter<"VintedItem"> | Date | string | null
   sourceUrl?: Prisma.StringNullableFilter<"VintedItem"> | string | null
+  notifiedAt?: Prisma.DateTimeNullableFilter<"VintedItem"> | Date | string | null
   photos?: Prisma.PhotoListRelationFilter
 }
 
@@ -302,6 +310,7 @@ export type VintedItemOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   reuploadAt?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  notifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   photos?: Prisma.PhotoOrderByRelationAggregateInput
   _relevance?: Prisma.VintedItemOrderByRelevanceInput
 }
@@ -324,6 +333,7 @@ export type VintedItemWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"VintedItem"> | Date | string
   reuploadAt?: Prisma.DateTimeNullableFilter<"VintedItem"> | Date | string | null
   sourceUrl?: Prisma.StringNullableFilter<"VintedItem"> | string | null
+  notifiedAt?: Prisma.DateTimeNullableFilter<"VintedItem"> | Date | string | null
   photos?: Prisma.PhotoListRelationFilter
 }, "id">
 
@@ -342,6 +352,7 @@ export type VintedItemOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   reuploadAt?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  notifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.VintedItemCountOrderByAggregateInput
   _avg?: Prisma.VintedItemAvgOrderByAggregateInput
   _max?: Prisma.VintedItemMaxOrderByAggregateInput
@@ -367,6 +378,7 @@ export type VintedItemScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"VintedItem"> | Date | string
   reuploadAt?: Prisma.DateTimeNullableWithAggregatesFilter<"VintedItem"> | Date | string | null
   sourceUrl?: Prisma.StringNullableWithAggregatesFilter<"VintedItem"> | string | null
+  notifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"VintedItem"> | Date | string | null
 }
 
 export type VintedItemCreateInput = {
@@ -383,6 +395,7 @@ export type VintedItemCreateInput = {
   createdAt?: Date | string
   reuploadAt?: Date | string | null
   sourceUrl?: string | null
+  notifiedAt?: Date | string | null
   photos?: Prisma.PhotoCreateNestedManyWithoutItemInput
 }
 
@@ -401,6 +414,7 @@ export type VintedItemUncheckedCreateInput = {
   createdAt?: Date | string
   reuploadAt?: Date | string | null
   sourceUrl?: string | null
+  notifiedAt?: Date | string | null
   photos?: Prisma.PhotoUncheckedCreateNestedManyWithoutItemInput
 }
 
@@ -418,6 +432,7 @@ export type VintedItemUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reuploadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.PhotoUpdateManyWithoutItemNestedInput
 }
 
@@ -436,6 +451,7 @@ export type VintedItemUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reuploadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   photos?: Prisma.PhotoUncheckedUpdateManyWithoutItemNestedInput
 }
 
@@ -454,6 +470,7 @@ export type VintedItemCreateManyInput = {
   createdAt?: Date | string
   reuploadAt?: Date | string | null
   sourceUrl?: string | null
+  notifiedAt?: Date | string | null
 }
 
 export type VintedItemUpdateManyMutationInput = {
@@ -470,6 +487,7 @@ export type VintedItemUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reuploadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type VintedItemUncheckedUpdateManyInput = {
@@ -487,6 +505,7 @@ export type VintedItemUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reuploadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type VintedItemOrderByRelevanceInput = {
@@ -510,6 +529,7 @@ export type VintedItemCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   reuploadAt?: Prisma.SortOrder
   sourceUrl?: Prisma.SortOrder
+  notifiedAt?: Prisma.SortOrder
 }
 
 export type VintedItemAvgOrderByAggregateInput = {
@@ -530,6 +550,7 @@ export type VintedItemMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   reuploadAt?: Prisma.SortOrder
   sourceUrl?: Prisma.SortOrder
+  notifiedAt?: Prisma.SortOrder
 }
 
 export type VintedItemMinOrderByAggregateInput = {
@@ -545,6 +566,7 @@ export type VintedItemMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   reuploadAt?: Prisma.SortOrder
   sourceUrl?: Prisma.SortOrder
+  notifiedAt?: Prisma.SortOrder
 }
 
 export type VintedItemSumOrderByAggregateInput = {
@@ -617,6 +639,7 @@ export type VintedItemCreateWithoutPhotosInput = {
   createdAt?: Date | string
   reuploadAt?: Date | string | null
   sourceUrl?: string | null
+  notifiedAt?: Date | string | null
 }
 
 export type VintedItemUncheckedCreateWithoutPhotosInput = {
@@ -634,6 +657,7 @@ export type VintedItemUncheckedCreateWithoutPhotosInput = {
   createdAt?: Date | string
   reuploadAt?: Date | string | null
   sourceUrl?: string | null
+  notifiedAt?: Date | string | null
 }
 
 export type VintedItemCreateOrConnectWithoutPhotosInput = {
@@ -666,6 +690,7 @@ export type VintedItemUpdateWithoutPhotosInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reuploadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type VintedItemUncheckedUpdateWithoutPhotosInput = {
@@ -683,6 +708,7 @@ export type VintedItemUncheckedUpdateWithoutPhotosInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reuploadAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -731,6 +757,7 @@ export type VintedItemSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   createdAt?: boolean
   reuploadAt?: boolean
   sourceUrl?: boolean
+  notifiedAt?: boolean
   photos?: boolean | Prisma.VintedItem$photosArgs<ExtArgs>
   _count?: boolean | Prisma.VintedItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vintedItem"]>
@@ -752,9 +779,10 @@ export type VintedItemSelectScalar = {
   createdAt?: boolean
   reuploadAt?: boolean
   sourceUrl?: boolean
+  notifiedAt?: boolean
 }
 
-export type VintedItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "price" | "status" | "description" | "brand" | "size" | "color" | "material" | "category" | "dimensions" | "createdAt" | "reuploadAt" | "sourceUrl", ExtArgs["result"]["vintedItem"]>
+export type VintedItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "price" | "status" | "description" | "brand" | "size" | "color" | "material" | "category" | "dimensions" | "createdAt" | "reuploadAt" | "sourceUrl" | "notifiedAt", ExtArgs["result"]["vintedItem"]>
 export type VintedItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   photos?: boolean | Prisma.VintedItem$photosArgs<ExtArgs>
   _count?: boolean | Prisma.VintedItemCountOutputTypeDefaultArgs<ExtArgs>
@@ -780,6 +808,7 @@ export type $VintedItemPayload<ExtArgs extends runtime.Types.Extensions.Internal
     createdAt: Date
     reuploadAt: Date | null
     sourceUrl: string | null
+    notifiedAt: Date | null
   }, ExtArgs["result"]["vintedItem"]>
   composites: {}
 }
@@ -1164,6 +1193,7 @@ export interface VintedItemFieldRefs {
   readonly createdAt: Prisma.FieldRef<"VintedItem", 'DateTime'>
   readonly reuploadAt: Prisma.FieldRef<"VintedItem", 'DateTime'>
   readonly sourceUrl: Prisma.FieldRef<"VintedItem", 'String'>
+  readonly notifiedAt: Prisma.FieldRef<"VintedItem", 'DateTime'>
 }
     
 

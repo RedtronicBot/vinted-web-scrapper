@@ -1,6 +1,10 @@
 import type { Photo } from "../../types"
 import { waitForElement } from "../utils/dom"
 
+/* -------------------------------------------------------------------------- */
+/*  Champs simples                                                            */
+/* -------------------------------------------------------------------------- */
+
 export function fillReactInput(selector: string, value: string) {
 	const el = document.querySelector<HTMLInputElement>(selector)
 	if (!el) return
@@ -60,7 +64,23 @@ export async function fillPhotos(photos: Photo[]) {
 	input.dispatchEvent(new Event("change", { bubbles: true }))
 }
 
-const CATEGORY_CONTENT = '[data-testid="catalog-select-dropdown-content"]'
+export async function fillDimensions(dimensions?: { width: string; length: string } | null) {
+	if (!dimensions) return
+
+	if (dimensions.width) {
+		fillReactInput('[data-testid="measurement-width--input"]', dimensions.width)
+	}
+
+	if (dimensions.length) {
+		fillReactInput('[data-testid="measurement-length--input"]', dimensions.length)
+	}
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Outils pour les menus déroulants                                          */
+/*  Vinted a deux versions : anciens <input> et nouveaux <button> (Radix)      */
+/* -------------------------------------------------------------------------- */
+
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function pollFor<T>(check: () => T | null, timeout: number, interval = 150): Promise<T | null> {
@@ -73,311 +93,248 @@ async function pollFor<T>(check: () => T | null, timeout: number, interval = 150
 	return null
 }
 
-function findCategoryCell(text: string): HTMLElement | null {
-	const cells = Array.from(document.querySelectorAll(`${CATEGORY_CONTENT} .web_ui__Cell__title`))
-	const cell = cells.find((el) => el.textContent?.trim() === text)
-	if (!cell) return null
-	return (cell.closest('[role="button"]') as HTMLElement) ?? (cell as HTMLElement)
+const normText = (s: string) =>
+	s
+		.replace(/\u00a0/g, " ")
+		.replace(/[’‘`]/g, "'")
+		.replace(/\s+/g, " ")
+		.trim()
+		.toLowerCase()
+
+// Trouve l'élément cliquable dont le texte est exactement `text`
+function findByText(container: Element, text: string): HTMLElement | null {
+	const wanted = normText(text)
+	const match = Array.from(container.querySelectorAll<HTMLElement>("*")).find(
+		(n) => normText(n.textContent ?? "") === wanted && !Array.from(n.children).some((c) => normText(c.textContent ?? "") === wanted),
+	)
+	if (!match) return null
+	const target = match.closest<HTMLElement>(
+		'[role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"], [role="button"], [role="option"], [role="checkbox"], [role="radio"], button, label, li',
+	)
+	return target && container.contains(target) ? target : match
 }
 
+// Valeur affichée : ancien composant (<input>) ou nouveau (<button> + <span ...--value>)
+function readDropdownValue(trigger: HTMLElement): string {
+	if (trigger instanceof HTMLInputElement) return trigger.value
+	return (trigger.querySelector<HTMLElement>('[data-testid$="--value"]')?.textContent ?? "").trim()
+}
+
+function setNativeValue(el: HTMLInputElement, value: string) {
+	Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(el, value)
+	el.dispatchEvent(new Event("input", { bubbles: true }))
+}
+
+// Les menus Radix s'ouvrent sur pointerdown : on envoie toute la séquence souris
+function pointerClick(el: HTMLElement) {
+	const base = { bubbles: true, cancelable: true, view: window, button: 0 }
+	const pointer = { pointerId: 1, pointerType: "mouse", isPrimary: true }
+	el.dispatchEvent(new PointerEvent("pointerdown", { ...base, ...pointer, buttons: 1 }))
+	el.dispatchEvent(new MouseEvent("mousedown", { ...base, buttons: 1 }))
+	el.dispatchEvent(new PointerEvent("pointerup", { ...base, ...pointer, buttons: 0 }))
+	el.dispatchEvent(new MouseEvent("mouseup", { ...base, buttons: 0 }))
+	el.dispatchEvent(new MouseEvent("click", { ...base, buttons: 0 }))
+}
+
+// Retrouve le menu ouvert pour un déclencheur, ancien ou nouveau composant
+function findMenu(trigger: HTMLElement): HTMLElement | null {
+	const controls = trigger.getAttribute("aria-controls")
+	if (controls) {
+		const byId = document.getElementById(controls)
+		if (byId) return byId
+	}
+	const legacy = trigger.dataset.testid?.replace(/-input$/, "-content")
+	if (legacy) {
+		const el = document.querySelector<HTMLElement>(`[data-testid="${legacy}"]`)
+		if (el) return el
+	}
+	const popups = document.querySelectorAll<HTMLElement>('[data-radix-popper-content-wrapper], [role="menu"], [role="listbox"]')
+	return popups.length ? popups[popups.length - 1] : null
+}
+
+async function openMenu(trigger: HTMLElement): Promise<HTMLElement> {
+	for (let attempt = 0; attempt < 3; attempt++) {
+		if (trigger.getAttribute("aria-expanded") !== "true") pointerClick(trigger)
+		const menu = await pollFor(() => findMenu(trigger), 2500)
+		if (menu) return menu
+	}
+	throw new Error(`Menu introuvable : ${trigger.dataset.testid}`)
+}
+
+function closeMenu(trigger: HTMLElement) {
+	if (trigger.getAttribute("aria-expanded") === "true") {
+		document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", code: "Escape", bubbles: true }))
+	} else {
+		clickOutside()
+	}
+}
+
+function clickOutside() {
+	const body = document.body
+
+	body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, view: window }))
+	body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, view: window }))
+	body.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }))
+}
+
+// État, couleur, matériau : même logique, seuls le déclencheur et les libellés changent
+async function selectFromMenu(triggerSelector: string, labels: string[], multi = false) {
+	if (labels.length === 0) return
+	const trigger = await waitForElement<HTMLElement>(triggerSelector)
+	const menu = await openMenu(trigger)
+
+	let selected = 0
+	for (const label of labels) {
+		const target = await pollFor(() => {
+			const m = findMenu(trigger)
+			return m ? findByText(m, label) : null
+		}, 3000)
+		if (!target) {
+			console.warn(`[Vinted Reupload] option introuvable : ${label}`, (findMenu(trigger) ?? menu).outerHTML.slice(0, 8000))
+			continue
+		}
+		target.click()
+		selected++
+		await pause(250)
+		if (!multi) break
+	}
+	closeMenu(trigger)
+	if (selected === 0) throw new Error(`Option introuvable : ${labels.join(", ")}`)
+}
+
+const splitList = (value: string) =>
+	value
+		.split(",")
+		.map((v) => v.trim())
+		.filter(Boolean)
+
+/* -------------------------------------------------------------------------- */
+/*  Menus déroulants                                                          */
+/* -------------------------------------------------------------------------- */
+
 export async function fillCategory(category: string[]) {
-	const input = document.querySelector<HTMLElement>('[data-testid="catalog-select-dropdown-input"]')
-	if (!input) throw new Error("Input catégorie introuvable")
+	const trigger = await waitForElement<HTMLElement>('[data-testid="catalog-select-dropdown-input"]')
+	await openMenu(trigger)
 
-	input.click()
-	input.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
-	await waitForElement(CATEGORY_CONTENT)
+	const cellIn = (label: string) => {
+		const menu = findMenu(trigger)
+		return menu ? findByText(menu, label) : null
+	}
 
+	// Navigue niveau par niveau, en vérifiant que le menu change bien de niveau après chaque clic
 	for (let i = 0; i < category.length; i++) {
 		const label = category[i]
 		const next = category[i + 1]
-		// Pour le dernier niveau, il n'y a rien à attendre après le clic
-		const advanced = () => (next ? findCategoryCell(next) : true)
+		const advanced = () => (next ? cellIn(next) : true)
 
 		let ok = false
 		for (let attempt = 0; attempt < 3 && !ok; attempt++) {
-			const cell = await pollFor(() => findCategoryCell(label), 6000)
+			const cell = await pollFor(() => cellIn(label), 6000)
 			if (!cell) break
 			cell.click()
 			ok = Boolean(await pollFor(advanced, 3000))
 		}
-		if (!ok) throw new Error(`Catégorie introuvable : ${label}`)
+		if (!ok) {
+			console.warn(`[Vinted Reupload] catégorie introuvable : ${label}`, findMenu(trigger)?.outerHTML.slice(0, 8000))
+			throw new Error(`Catégorie introuvable : ${label}`)
+		}
 	}
 	await pause(500)
 }
 
-const normBrand = (s: string) => s.replace(/[’‘`]/g, "'").trim().toLowerCase()
-
 export async function fillBrand(brand: string) {
-	const input = await waitForElement<HTMLInputElement>('[data-testid="brand-select-dropdown-input"]')
-	const isSet = () => normBrand(input.value) === normBrand(brand)
-	const menuOpen = () => document.querySelector('[data-testid="brand-select-dropdown-content"], [data-testid="brand-search--input"]')
+	const trigger = await waitForElement<HTMLElement>('[data-testid="brand-select-dropdown-input"]')
+	const isSet = () => normText(readDropdownValue(trigger)) === normText(brand)
 
-	// Vinted peut pré-remplir la marque à partir du titre : on lui laisse quelques secondes
-	if (await pollFor(() => (isSet() ? true : null), 3000)) return
+	// Vinted peut pré-remplir la marque à partir du titre : on lui laisse un peu de temps
+	if (await pollFor(() => (isSet() ? true : null), 2500)) return
 
-	// On essaie d'ouvrir le menu avec un clic, puis avec la séquence complète d'événements souris
-	for (const attempt of [0, 1]) {
-		if (attempt === 0) {
-			input.click()
-		} else {
-			input.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }))
-			input.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }))
-			input.click()
+	await openMenu(trigger)
+	const optionIn = () => {
+		const menu = findMenu(trigger)
+		return menu ? findByText(menu, brand) : null
+	}
+
+	// Stratégie 1 : la marque est dans les suggestions
+	let option = await pollFor(optionIn, 1500)
+
+	// Stratégie 2 : on tape dans le champ de recherche du menu
+	if (!option) {
+		const search = findMenu(trigger)?.querySelector<HTMLInputElement>("input:not([type=hidden])")
+		if (search) {
+			search.focus()
+			setNativeValue(search, brand)
+			option = await pollFor(optionIn, 4000)
 		}
-		if (await pollFor(() => menuOpen() ?? (isSet() ? true : null), 3000)) break
 	}
 
-	if (isSet()) return
-	if (!menuOpen()) {
-		console.warn(
-			"[Vinted Reupload] menu marque introuvable, testids contenant 'brand' ou 'search' :",
-			[...document.querySelectorAll('[data-testid*="brand"], [data-testid*="search"]')].map((el) => el.getAttribute("data-testid")),
-		)
-		console.warn(
-			"[Vinted Reupload] menu ouvert :",
-			document.querySelector("[data-radix-popper-content-wrapper]")?.outerHTML.slice(0, 6000) ?? "aucun",
-		)
-		throw new Error("Menu marque introuvable")
+	if (!option) {
+		console.warn("[Vinted Reupload] marque introuvable", findMenu(trigger)?.outerHTML.slice(0, 8000))
+		throw new Error(`Marque introuvable : ${brand}`)
 	}
-
-	// Stratégie 1 : cherche dans les suggestions directement
-	const found = await findAndClickBrand(brand)
-	if (found) return
-
-	// Stratégie 2 : tape dans la barre de recherche
-	const searchInput = document.querySelector<HTMLInputElement>('[data-testid="brand-search--input"]')
-	if (!searchInput) return
-
-	searchInput.focus()
-	searchInput.value = brand
-	searchInput.dispatchEvent(new Event("input", { bubbles: true }))
-
-	// Attend les résultats puis clique sur le premier match exact ou le custom
-	await new Promise<void>((resolve) => {
-		const interval = setInterval(() => {
-			// Cherche un match exact en premier
-			const exact = findAndClickBrand(brand)
-			if (exact) {
-				clearInterval(interval)
-				resolve()
-				return
-			}
-
-			// Sinon prend le custom "Utiliser X comme marque"
-			const custom = document.querySelector<HTMLElement>("#custom-select-brand")
-			if (custom) {
-				clearInterval(interval)
-				custom.click()
-				resolve()
-			}
-		}, 300)
-		setTimeout(() => {
-			clearInterval(interval)
-			resolve()
-		}, 2000)
-	})
-}
-
-function findAndClickBrand(brand: string): boolean {
-	const cells = Array.from(document.querySelectorAll('[data-testid="brand-select-dropdown-content"] .web_ui__Cell__title'))
-	const match = cells.find((el) => el.textContent?.trim().toLowerCase() === brand.toLowerCase())
-	if (match) {
-		const btn = match.closest('[role="button"]') as HTMLElement
-		btn?.click()
-		return true
-	}
-	return false
+	option.click()
+	await pause(300)
+	closeMenu(trigger)
 }
 
 export async function fillSize(size: string) {
-	const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+	const trigger = await waitForElement<HTMLElement>('[data-testid^="category-size-"][data-testid$="-input"]')
+	const openedMenu = await openMenu(trigger)
+	const currentMenu = () => findMenu(trigger) ?? openedMenu
 
-	const input = await waitForElement<HTMLElement>('[data-testid^="category-size-"][data-testid$="-input"]')
-	input.click()
-
-	// Le menu est rendu dans un portail Radix, hors du formulaire
-	const menu = await waitForElement<HTMLElement>('[data-testid^="category-size-"][data-testid$="-content"], [data-radix-popper-content-wrapper]')
-
-	// "M / 38 / 10" -> ["M", "38", "10"], testés tels quels puis préfixés
+	// "M / 38 / 10" -> ["M", "38", "10"], testés tels quels puis préfixés (FR 38, EU 38...)
 	const tokens = size
 		.split("/")
 		.map((t) => t.trim())
 		.filter(Boolean)
 	const prefixes = ["", "FR ", "EU ", "UK ", "IT ", "US "]
-	const candidates = tokens.flatMap((t) => prefixes.map((p) => `${p}${t}`.toLowerCase()))
+	const candidates = tokens.flatMap((t) => prefixes.map((p) => `${p}${t}`))
 
-	const clickable = 'button, [role="button"], [role="menuitem"], [role="option"], [role="radio"], [role="checkbox"], [tabindex]'
-	const textOf = (el: Element) => (el.textContent ?? "").trim().replace(/\s+/g, " ").toLowerCase()
-
-	const findOption = (): HTMLElement | undefined => {
-		const nodes = Array.from(menu.querySelectorAll<HTMLElement>("*"))
+	const findOption = (): HTMLElement | null => {
+		const menu = currentMenu()
 		for (const wanted of candidates) {
-			// l'élément le plus profond dont le texte est exactement la valeur voulue
-			const el = nodes.find((n) => textOf(n) === wanted && !Array.from(n.children).some((c) => textOf(c) === wanted))
-			if (!el) continue
-			const target = el.closest<HTMLElement>(clickable)
-			return target && target !== menu && menu.contains(target) ? target : el
+			const option = findByText(menu, wanted)
+			if (option) return option
 		}
+		return null
 	}
 
-	const tryClick = async (attempts: number): Promise<boolean> => {
-		for (let i = 0; i < attempts; i++) {
-			const option = findOption()
-			if (option) {
-				option.click()
-				return true
-			}
-			await wait(300)
-		}
-		return false
+	const tryClick = async (timeout: number): Promise<boolean> => {
+		const option = await pollFor(findOption, timeout)
+		if (!option) return false
+		option.click()
+		return true
 	}
 
-	let done = await tryClick(6)
+	let done = await tryClick(2000)
 
 	// Sinon, on essaie les autres systèmes de tailles proposés par les puces
 	if (!done) {
 		for (const system of ["EU", "UK", "FR", "IT", "US"]) {
-			const chip = Array.from(menu.querySelectorAll<HTMLElement>("button, [role='button'], [role='radio']")).find(
+			const chip = Array.from(currentMenu().querySelectorAll<HTMLElement>("button, [role='button'], [role='radio']")).find(
 				(b) => (b.textContent ?? "").trim() === system,
 			)
 			if (!chip) continue
 			chip.click()
-			await wait(300)
-			if (await tryClick(2)) {
+			await pause(300)
+			if (await tryClick(1000)) {
 				done = true
 				break
 			}
 		}
 	}
 
-	if (!done) throw new Error(`Taille introuvable : ${size}`)
-
-	// Referme le menu s'il est resté ouvert
-	await wait(300)
-	if (document.querySelector("[data-radix-popper-content-wrapper]")) {
-		document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
-	}
-}
-
-export async function fillCondition(status: string) {
-	const input = await waitForElement<HTMLElement>('[data-testid="category-condition-single-list-input"]')
-	input.click()
-
-	const content = await waitForElement('[data-testid="category-condition-single-list-content"]')
-
-	const target = await pollFor(() => findByText(content, status), 3000)
-	if (!target) {
-		console.warn(`État introuvable : ${status}`, content.outerHTML.slice(0, 8000))
-		throw new Error(`État introuvable : ${status}`)
-	}
-	target.click()
-	await pause(200)
-}
-
-function findByText(container: Element, text: string): HTMLElement | null {
-	const wanted = text.trim().toLowerCase()
-	const norm = (el: Element) => (el.textContent ?? "").trim().replace(/\s+/g, " ").toLowerCase()
-	const match = Array.from(container.querySelectorAll<HTMLElement>("*")).find(
-		(n) => norm(n) === wanted && !Array.from(n.children).some((c) => norm(c) === wanted),
-	)
-	if (!match) return null
-	return (
-		match.closest<HTMLElement>('[role="button"], [role="menuitem"], [role="option"], [role="checkbox"], [role="radio"], button, label, li') ?? match
-	)
-}
-
-export async function fillColor(color: string) {
-	const input = await waitForElement<HTMLElement>('[data-testid="color-select-dropdown-input"]')
-	input.click()
-
-	const content = await waitForElement('[data-testid="color-select-dropdown-content"]')
-
-	const colors = color
-		.split(",")
-		.map((c) => c.trim())
-		.filter(Boolean)
-		.slice(0, 2)
-
-	let selected = 0
-	for (const c of colors) {
-		const target = await pollFor(() => findByText(content, c), 3000)
-		if (!target) {
-			console.warn(`Couleur introuvable : ${c}`, content.outerHTML.slice(0, 8000))
-			continue
-		}
-		target.click()
-		selected++
-		await pause(200)
-	}
-	clickOutside()
-	if (selected === 0 && colors.length > 0) throw new Error(`Couleur introuvable : ${color}`)
-}
-
-export async function fillMaterial(material: string) {
-	if (!material) return
-
-	const input = await waitForElement<HTMLElement>('[data-testid="category-material-multi-list-input"]')
-	input.click()
-
-	const content = await waitForElement('[data-testid="category-material-multi-list-content"]')
-
-	const materials = material
-		.split(",")
-		.map((m) => m.trim())
-		.filter(Boolean)
-
-	let selected = 0
-	for (const m of materials) {
-		const target = await pollFor(() => findByText(content, m), 3000)
-		if (!target) {
-			console.warn(`Matériau introuvable : ${m}`, content.outerHTML.slice(0, 8000))
-			continue
-		}
-		target.click()
-		selected++
-		await pause(200)
-	}
-	clickOutside()
-	if (selected === 0) throw new Error(`Matériau introuvable : ${material}`)
-}
-
-function clickOutside() {
-	const body = document.body
-
-	body.dispatchEvent(
-		new MouseEvent("mousedown", {
-			bubbles: true,
-			cancelable: true,
-			view: window,
-		}),
-	)
-
-	body.dispatchEvent(
-		new MouseEvent("mouseup", {
-			bubbles: true,
-			cancelable: true,
-			view: window,
-		}),
-	)
-
-	body.dispatchEvent(
-		new MouseEvent("click", {
-			bubbles: true,
-			cancelable: true,
-			view: window,
-		}),
-	)
-}
-
-export async function fillDimensions(dimensions?: { width: string; length: string } | null) {
-	if (!dimensions) return
-
-	if (dimensions.width) {
-		fillReactInput('[data-testid="measurement-width--input"]', dimensions.width)
+	if (!done) {
+		console.warn(`[Vinted Reupload] taille introuvable : ${size}`, currentMenu().outerHTML.slice(0, 8000))
+		throw new Error(`Taille introuvable : ${size}`)
 	}
 
-	if (dimensions.length) {
-		fillReactInput('[data-testid="measurement-length--input"]', dimensions.length)
-	}
+	await pause(300)
+	closeMenu(trigger)
 }
+
+export const fillCondition = (status: string) => selectFromMenu('[data-testid="category-condition-single-list-input"]', [status])
+
+export const fillColor = (color: string) => selectFromMenu('[data-testid="color-select-dropdown-input"]', splitList(color).slice(0, 2), true)
+
+export const fillMaterial = (material: string) => selectFromMenu('[data-testid="category-material-multi-list-input"]', splitList(material), true)

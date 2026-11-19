@@ -2,6 +2,8 @@ import { Injectable, Logger } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { Cron } from "@nestjs/schedule"
 import { PrismaService } from "prisma/prisma.service"
+import { cert, getApps, initializeApp } from "firebase-admin/app"
+import { getMessaging } from "firebase-admin/messaging"
 
 const MAX_PER_RUN = 5
 
@@ -13,6 +15,13 @@ export class NotificationsService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {}
+  onModuleInit() {
+    if (!getApps().length) {
+      initializeApp({
+        credential: cert(JSON.parse(this.config.getOrThrow<string>("FIREBASE_SERVICE_ACCOUNT"))),
+      })
+    }
+  }
 
   // Toutes les heures de 9h à 21h, heure de Paris
   @Cron("0 9-21 * * *", { timeZone: "Europe/Paris" })
@@ -38,21 +47,22 @@ export class NotificationsService {
   }
 
   private async push(id: number, title: string) {
-    const token = this.config.get<string>("NTFY_TOKEN")
-    const res = await fetch(this.config.getOrThrow<string>("NTFY_URL"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-      body: JSON.stringify({
-        topic: this.config.getOrThrow<string>("NTFY_TOPIC"),
-        title: "Article à republier",
-        message: title,
-        click: `https://www.vinted.fr/items/new#vr=${id}`,
-        tags: ["recycle"],
-      }),
+    const devices = await this.prisma.device.findMany()
+    if (!devices.length) throw new Error("Aucun appareil enregistré")
+
+    const res = await getMessaging().sendEachForMulticast({
+      tokens: devices.map((d) => d.token),
+      notification: { title: "Article à republier", body: title },
+      data: { url: `https://www.vinted.fr/items/new#vr=${id}` },
+      android: { priority: "high" },
     })
-    if (!res.ok) throw new Error(`ntfy a répondu ${res.status}`)
+
+    // nettoyer les tokens morts
+    const dead = res.responses
+      .map((r, i) => (r.error?.code === "messaging/registration-token-not-registered" ? devices[i].token : null))
+      .filter((t): t is string => !!t)
+    if (dead.length) await this.prisma.device.deleteMany({ where: { token: { in: dead } } })
+
+    if (res.successCount === 0) throw new Error("Aucune notif envoyée")
   }
 }

@@ -49,3 +49,8 @@ export type VintedItem = Prisma.VintedItemModel
  * 
  */
 export type Photo = Prisma.PhotoModel
+/**
+ * Model Device
+ * 
+ */
+export type Device = Prisma.DeviceModel

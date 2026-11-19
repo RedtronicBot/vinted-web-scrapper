@@ -52,7 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   VintedItem: 'VintedItem',
-  Photo: 'Photo'
+  Photo: 'Photo',
+  Device: 'Device'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -85,7 +86,8 @@ export const VintedItemScalarFieldEnum = {
   dimensions: 'dimensions',
   createdAt: 'createdAt',
   reuploadAt: 'reuploadAt',
-  sourceUrl: 'sourceUrl'
+  sourceUrl: 'sourceUrl',
+  notifiedAt: 'notifiedAt'
 } as const
 
 export type VintedItemScalarFieldEnum = (typeof VintedItemScalarFieldEnum)[keyof typeof VintedItemScalarFieldEnum]
@@ -100,6 +102,15 @@ export const PhotoScalarFieldEnum = {
 } as const
 
 export type PhotoScalarFieldEnum = (typeof PhotoScalarFieldEnum)[keyof typeof PhotoScalarFieldEnum]
+
+
+export const DeviceScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  createdAt: 'createdAt'
+} as const
+
+export type DeviceScalarFieldEnum = (typeof DeviceScalarFieldEnum)[keyof typeof DeviceScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -169,4 +180,11 @@ export const PhotoOrderByRelevanceFieldEnum = {
 } as const
 
 export type PhotoOrderByRelevanceFieldEnum = (typeof PhotoOrderByRelevanceFieldEnum)[keyof typeof PhotoOrderByRelevanceFieldEnum]
+
+
+export const DeviceOrderByRelevanceFieldEnum = {
+  token: 'token'
+} as const
+
+export type DeviceOrderByRelevanceFieldEnum = (typeof DeviceOrderByRelevanceFieldEnum)[keyof typeof DeviceOrderByRelevanceFieldEnum]
 

@@ -10,4 +10,5 @@
  */
 export type * from './models/VintedItem'
 export type * from './models/Photo'
+export type * from './models/Device'
 export type * from './commonInputTypes'
