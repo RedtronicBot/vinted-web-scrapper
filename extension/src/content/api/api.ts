@@ -25,4 +25,10 @@ export const api = {
 		request<void>(`/items/${id}`, {
 			method: "DELETE",
 		}),
+	setStage: (id: number, stage: "PENDING" | "DRAFT" | "PUBLISHED", draftId?: string) =>
+		request<VintedItem>(`/items/${id}/stage`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json", "x-api-key": import.meta.env.VITE_API_KEY },
+			body: JSON.stringify({ stage, draftId }),
+		}),
 }

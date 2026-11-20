@@ -27,6 +27,9 @@ export default function App() {
 			const url = notification.data?.url
 			if (url) openInChosenBrowser(url)
 		})
+		PushNotifications.addListener("pushNotificationReceived", (n) => {
+			add("Notif reçue (app ouverte) : " + n.title)
+		})
 
 		// liste des navigateurs + choix déjà enregistré
 		listBrowsers()

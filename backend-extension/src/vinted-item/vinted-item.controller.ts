@@ -1,7 +1,9 @@
 // items/items.controller.ts
-import { Controller, Get, Post, Delete, Body, Param, ParseIntPipe, NotFoundException } from "@nestjs/common"
+import { Controller, Get, Post, Delete, Body, Param, ParseIntPipe, NotFoundException, UseGuards, Patch } from "@nestjs/common"
 import { VintedItemService } from "./vinted-item.service"
 import { CreateItemDto } from "./dto/createItem.dto"
+import { ApiKeyGuard } from "src/auth/api-key.guard"
+import { UpdateStageDto } from "./dto/UpdateStage.dto"
 
 @Controller("items")
 export class VintedItemController {
@@ -25,6 +27,18 @@ export class VintedItemController {
   @Get("urls")
   findAllUrls() {
     return this.vintedItemService.findAllUrls()
+  }
+
+  @Get("todo")
+  @UseGuards(ApiKeyGuard)
+  findTodo() {
+    return this.vintedItemService.findTodo()
+  }
+
+  @Patch(":id/stage")
+  @UseGuards(ApiKeyGuard)
+  setStage(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateStageDto) {
+    return this.vintedItemService.setStage(id, dto.stage)
   }
 
   @Get(":id")

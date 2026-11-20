@@ -4,6 +4,7 @@ import { promises as fs } from "fs"
 import { PrismaService } from "prisma/prisma.service"
 import { CreateItemDto } from "./dto/createItem.dto"
 import { join } from "path"
+import { ItemStage } from "prisma/generated/prisma/client"
 
 @Injectable()
 export class VintedItemService {
@@ -85,5 +86,26 @@ export class VintedItemService {
       }
     }
     return results
+  }
+
+  setStage(id: number, stage: ItemStage, draftId?: string) {
+    return this.prisma.vintedItem.update({
+      where: { id },
+      data: { stage, notifiedAt: null, ...(draftId ? { draftId } : {}) },
+    })
+  }
+
+  findTodo() {
+    return this.prisma.vintedItem.findMany({
+      where: { stage: { not: "PUBLISHED" }, reuploadAt: { lte: new Date() } },
+      orderBy: { reuploadAt: "asc" },
+      select: {
+        id: true,
+        title: true,
+        stage: true,
+        reuploadAt: true,
+        photos: { orderBy: { position: "asc" }, take: 1, select: { filename: true } },
+      },
+    })
   }
 }

@@ -109,9 +109,7 @@ export function handlePrefill() {
 			const draftBtn = await waitForElement<HTMLElement>('[data-testid="upload-form-save-draft-button"]')
 			draftBtn.click()
 
-			if (pendingPrefill.id) {
-				await api.deleteItem(pendingPrefill.id)
-			}
+			await chrome.storage.local.set({ pendingDraft: { itemId: pendingPrefill.id, title: pendingPrefill.title } })
 		})
 	})
 }

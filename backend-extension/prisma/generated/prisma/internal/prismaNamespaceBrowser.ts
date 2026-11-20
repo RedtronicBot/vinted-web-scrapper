@@ -87,6 +87,8 @@ export const VintedItemScalarFieldEnum = {
   createdAt: 'createdAt',
   reuploadAt: 'reuploadAt',
   sourceUrl: 'sourceUrl',
+  stage: 'stage',
+  draftId: 'draftId',
   notifiedAt: 'notifiedAt'
 } as const
 
@@ -169,7 +171,8 @@ export const VintedItemOrderByRelevanceFieldEnum = {
   size: 'size',
   color: 'color',
   material: 'material',
-  sourceUrl: 'sourceUrl'
+  sourceUrl: 'sourceUrl',
+  draftId: 'draftId'
 } as const
 
 export type VintedItemOrderByRelevanceFieldEnum = (typeof VintedItemOrderByRelevanceFieldEnum)[keyof typeof VintedItemOrderByRelevanceFieldEnum]

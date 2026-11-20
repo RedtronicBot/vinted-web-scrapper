@@ -6,6 +6,7 @@ import { cert, getApps, initializeApp } from "firebase-admin/app"
 import { getMessaging } from "firebase-admin/messaging"
 
 const MAX_PER_RUN = 5
+const DAY = 24 * 60 * 60 * 1000
 
 @Injectable()
 export class NotificationsService {
@@ -27,33 +28,51 @@ export class NotificationsService {
   @Cron("0 9-21 * * *", { timeZone: "Europe/Paris" })
   async notifyDueItems() {
     const due = await this.prisma.vintedItem.findMany({
-      where: { reuploadAt: { lte: new Date() }, notifiedAt: null },
+      where: {
+        stage: "PENDING",
+        reuploadAt: { lte: new Date() },
+        OR: [{ notifiedAt: null }, { notifiedAt: { lte: new Date(Date.now() - DAY) } }],
+      },
       orderBy: { reuploadAt: "asc" },
       take: MAX_PER_RUN,
-      select: { id: true, title: true },
+      select: { id: true, title: true, notifiedAt: true },
     })
 
     for (const item of due) {
-      try {
-        await this.push(item.id, item.title)
-        await this.prisma.vintedItem.update({
-          where: { id: item.id },
-          data: { notifiedAt: new Date() },
-        })
-      } catch (e) {
-        this.logger.error(`Notif échouée pour l'article ${item.id}`, e as Error)
-      }
+      await this.notify(item.id, item.notifiedAt ? "Rappel : article à republier" : "Article à republier", item.title)
     }
   }
 
-  private async push(id: number, title: string) {
+  // Tous les jours à 17h : brouillons à publier
+  @Cron("0 17 * * *", { timeZone: "Europe/Paris" })
+  async notifyDrafts() {
+    const drafts = await this.prisma.vintedItem.findMany({
+      where: { stage: "DRAFT", notifiedAt: null },
+      take: MAX_PER_RUN,
+      select: { id: true, title: true, draftId: true },
+    })
+    for (const item of drafts) {
+      await this.notify(item.id, "Brouillon à publier", item.title, `https://www.vinted.fr/items/${item.draftId}/edit`)
+    }
+  }
+
+  private async notify(id: number, title: string, body: string, url = `https://www.vinted.fr/items/new#vr=${id}`) {
+    try {
+      await this.push(title, body, url)
+      await this.prisma.vintedItem.update({ where: { id }, data: { notifiedAt: new Date() } })
+    } catch (e) {
+      this.logger.error(`Notif échouée pour l'article ${id}`, e as Error)
+    }
+  }
+
+  private async push(title: string, body: string, url: string) {
     const devices = await this.prisma.device.findMany()
     if (!devices.length) throw new Error("Aucun appareil enregistré")
 
     const res = await getMessaging().sendEachForMulticast({
       tokens: devices.map((d) => d.token),
-      notification: { title: "Article à republier", body: title },
-      data: { url: `https://www.vinted.fr/items/new#vr=${id}` },
+      notification: { title, body },
+      data: { url },
       android: { priority: "high" },
     })
 

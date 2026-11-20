@@ -8,6 +8,12 @@ datasource db {
   provider = "mysql"
 }
 
+enum ItemStage {
+  PENDING
+  DRAFT
+  PUBLISHED
+}
+
 model VintedItem {
   id          Int       @id @default(autoincrement())
   title       String
@@ -24,6 +30,8 @@ model VintedItem {
   photos      Photo[]
   reuploadAt  DateTime?
   sourceUrl   String?
+  stage       ItemStage @default(PENDING)
+  draftId     String?   @db.VarChar(20)
   notifiedAt  DateTime?
 }
 

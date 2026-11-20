@@ -1,3 +1,4 @@
+import { matchPendingDraft } from "./draft/matchDraft"
 import { handlePrefill } from "./prefill/prefill"
 import { fetchPhotosFromCarousel } from "./scraping/fetchCaroussel"
 import { fetchCategoryFromPage } from "./scraping/fetchCategory"
@@ -23,3 +24,5 @@ setInterval(() => {
 	}
 }, 500)
 handlePrefill()
+
+if (window.location.pathname.startsWith("/member/")) matchPendingDraft()

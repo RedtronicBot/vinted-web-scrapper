@@ -658,6 +658,8 @@ export const VintedItemScalarFieldEnum = {
   createdAt: 'createdAt',
   reuploadAt: 'reuploadAt',
   sourceUrl: 'sourceUrl',
+  stage: 'stage',
+  draftId: 'draftId',
   notifiedAt: 'notifiedAt'
 } as const
 
@@ -740,7 +742,8 @@ export const VintedItemOrderByRelevanceFieldEnum = {
   size: 'size',
   color: 'color',
   material: 'material',
-  sourceUrl: 'sourceUrl'
+  sourceUrl: 'sourceUrl',
+  draftId: 'draftId'
 } as const
 
 export type VintedItemOrderByRelevanceFieldEnum = (typeof VintedItemOrderByRelevanceFieldEnum)[keyof typeof VintedItemOrderByRelevanceFieldEnum]
@@ -805,6 +808,13 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'ItemStage'
+ */
+export type EnumItemStageFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ItemStage'>
     
 
 
