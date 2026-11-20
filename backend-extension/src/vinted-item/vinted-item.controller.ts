@@ -38,7 +38,7 @@ export class VintedItemController {
   @Patch(":id/stage")
   @UseGuards(ApiKeyGuard)
   setStage(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateStageDto) {
-    return this.vintedItemService.setStage(id, dto.stage)
+    return this.vintedItemService.setStage(id, dto.stage, dto.draftId)
   }
 
   @Get(":id")

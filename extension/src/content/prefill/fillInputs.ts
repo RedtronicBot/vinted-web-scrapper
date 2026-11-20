@@ -9,15 +9,17 @@ export function fillReactInput(selector: string, value: string) {
 	const el = document.querySelector<HTMLInputElement>(selector)
 	if (!el) return
 
+	// Setter natif : contourne le suivi de valeur de React, qui ignorerait sinon la modification
+	const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set
 	el.focus()
-	el.value = ""
-
-	for (const char of value) {
-		el.value += char
-		el.dispatchEvent(new Event("input", { bubbles: true }))
-	}
-
+	setter?.call(el, value)
+	el.dispatchEvent(new Event("input", { bubbles: true }))
 	el.dispatchEvent(new Event("change", { bubbles: true }))
+
+	// Garde-fou : si React a réécrit la valeur, on le saura au lieu de publier un titre faux
+	if (el.value !== value) {
+		throw new Error(`Champ ${selector} mal rempli : "${el.value}" au lieu de "${value}"`)
+	}
 }
 
 export function fillReactTextarea(selector: string, value: string) {
