@@ -22,6 +22,8 @@ export interface VintedItem {
 	dimensions?: { width: string; length: string } | null
 	reuploadAt: string
 	sourceUrl: string
+	stage?: "PENDING" | "DRAFT" | "PUBLISHED"
+	draftId?: string | null
 }
 
 export type VintedItemPayload = Omit<VintedItem, "id" | "createdAt" | "photos"> & {

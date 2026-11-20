@@ -52,7 +52,7 @@ export class NotificationsService {
       select: { id: true, title: true, draftId: true },
     })
     for (const item of drafts) {
-      await this.notify(item.id, "Brouillon à publier", item.title, `https://www.vinted.fr/items/${item.draftId}/edit`)
+      await this.notify(item.id, "Brouillon à publier", item.title, `https://www.vinted.fr/items/${item.draftId}/edit#vr-publish=${item.id}`)
     }
   }
 

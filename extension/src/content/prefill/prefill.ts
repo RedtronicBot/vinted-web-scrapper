@@ -105,11 +105,18 @@ export function handlePrefill() {
 				return
 			}
 
-			clearPrefill()
+			// On note le brouillon attendu AVANT de cliquer : après le clic, Vinted redirige vers /member
+			// et la page peut être déchargée avant que l'écriture dans le storage soit terminée
+			await chrome.storage.local.set({ pendingDraft: { itemId: pendingPrefill.id, title: pendingPrefill.title } })
+
+			// Laisse le temps à Vinted de finir de traiter le formulaire (upload des photos, validation)
+			await new Promise((resolve) => setTimeout(resolve, 15000))
+
 			const draftBtn = await waitForElement<HTMLElement>('[data-testid="upload-form-save-draft-button"]')
 			draftBtn.click()
 
-			await chrome.storage.local.set({ pendingDraft: { itemId: pendingPrefill.id, title: pendingPrefill.title } })
+			// On vide le prefill seulement une fois le clic fait
+			await clearPrefill()
 		})
 	})
 }

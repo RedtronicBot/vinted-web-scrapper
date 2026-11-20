@@ -5,35 +5,42 @@ import { api } from "../api/api"
 
 export const selectedArticle = new Set<string>()
 
+import { showToast } from "../utils/dom"
+
 export async function finishSelection() {
-	// Collecte automatiquement tous les articles visibles
 	const cards = [...document.querySelectorAll<HTMLElement>('[data-testid^="product-item-id-"]')].filter((el) => !el.dataset.testid?.includes("--"))
 	const existingUrls = await api.getUrls()
+
 	cards.forEach((card) => {
-		const statusElement = card.querySelector('[data-testid$="--status-text"]')
-		if (statusElement) {
-			return
-		}
+		if (card.querySelector('[data-testid$="--status-text"]')) return
 		const link = card.querySelector<HTMLAnchorElement>("a")
-		if (link?.href && !existingUrls.includes(link.href)) {
-			selectedArticle.add(link.href)
-		}
+		if (link?.href && !existingUrls.includes(link.href)) selectedArticle.add(link.href)
 	})
 
-	try {
-		for (const article of selectedArticle) {
+	console.log(`[Vinted Reupload] ${cards.length} cartes trouvées, ${selectedArticle.size} à ajouter`)
+	if (selectedArticle.size === 0) {
+		showToast("Aucun nouvel article à ajouter sur cette page")
+		return
+	}
+
+	let ok = 0
+	const failed: string[] = []
+	for (const article of [...selectedArticle]) {
+		try {
 			const item = await fetchArticleDetails(article)
 			await api.saveItem(item)
-			await new Promise((resolve) => setTimeout(resolve, 5000))
+			ok++
+			console.log(`[Vinted Reupload] ajouté (${ok}) :`, item.title)
+		} catch (error) {
+			failed.push(article)
+			console.error("[Vinted Reupload] échec pour", article, error)
 		}
-		selectedArticle.clear()
-		const label = document.getElementById("vr-widget-label")!
-		label.textContent = "Vinted Reupload"
-		await renderStoredItems()
-	} catch (error) {
-		console.error("Erreur sauvegarde :", error)
-		throw error
+		selectedArticle.delete(article)
+		await new Promise((resolve) => setTimeout(resolve, 5000))
 	}
+
+	await renderStoredItems()
+	showToast(failed.length ? `${ok} ajouté(s), ${failed.length} en échec (voir la console)` : `${ok} article(s) ajouté(s)`)
 }
 
 export function updateWidgetCount() {

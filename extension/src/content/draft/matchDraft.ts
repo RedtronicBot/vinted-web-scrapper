@@ -1,5 +1,6 @@
 import { waitForElement } from "../utils/dom"
 import { api } from "../api/api"
+import { vintedIdFromUrl, type PendingDelete } from "../delete/deleteOriginal"
 type PendingDraft = { itemId: number; title: string }
 const key = (s: string) =>
 	s
@@ -50,6 +51,14 @@ export async function matchPendingDraft() {
 		return
 	}
 
-	await api.setStage(pendingDraft.itemId, "DRAFT", draft.id)
+	const item = await api.setStage(pendingDraft.itemId, "DRAFT", draft.id)
 	await chrome.storage.local.remove("pendingDraft")
+
+	// Le brouillon est enregistré : on peut aller supprimer l'ancien article
+	const vintedId = item.sourceUrl ? vintedIdFromUrl(item.sourceUrl) : undefined
+	if (!item.sourceUrl || !vintedId || vintedId === draft.id) return
+
+	const pendingDelete: PendingDelete = { itemId: pendingDraft.itemId, vintedId }
+	await chrome.storage.local.set({ pendingDelete })
+	window.location.href = item.sourceUrl
 }
