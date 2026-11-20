@@ -18,4 +18,12 @@ export class NotificationsController {
     await this.notifications.notifyDueItems()
     return { ok: true }
   }
+
+  @Post("drafts")
+  async drafts() {
+    // route de test, désactivée sauf si la variable est à "true"
+    if (this.config.get("ENABLE_TEST_ROUTES") !== "true") throw new NotFoundException()
+    await this.notifications.notifyDrafts()
+    return { ok: true }
+  }
 }

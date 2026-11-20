@@ -66,10 +66,23 @@ export default function App() {
 		}
 	}
 
+	async function runNotifyDrafts() {
+		try {
+			const res = await fetch(`${API_URL}/notifications/drafts`, {
+				method: "POST",
+				headers: { "x-api-key": API_KEY },
+			})
+			add("Envoi manuel : " + res.status)
+		} catch (e) {
+			add("Erreur : " + String(e))
+		}
+	}
+
 	return (
 		<div style={{ padding: 16 }}>
 			<button onClick={enable}>Activer les notifications</button>
 			<button onClick={runNotify}>Lancer notifyDueItems</button>
+			<button onClick={runNotifyDrafts}>Lancer notifyDrafts</button>
 
 			<h3>Navigateur</h3>
 			<select value={selected} onChange={(e) => onSelect(e.target.value)}>
