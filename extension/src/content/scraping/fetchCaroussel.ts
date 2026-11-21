@@ -24,20 +24,16 @@ export async function fetchPhotosFromCarousel(): Promise<{ src: string; position
 	}
 
 	// Stratégie 2 : fallback — récupère les images des figures directement
-	const photosMap = new Map<number, { src: string; position: number }>()
+	// Stratégie 2 : fallback — récupère les images des figures directement
+	const photos: { src: string; position: number }[] = []
 
-	Array.from(document.querySelectorAll("figure[class*='item-photo--']")).forEach((figure) => {
+	document.querySelectorAll<HTMLElement>("figure[class*='item-photo--']").forEach((figure) => {
 		const img = figure.querySelector("img")
-		if (!img) return
-
-		const positionClass = Array.from(figure.classList).find((c) => /^item-photo--\d+$/.test(c))
-		const position = positionClass ? parseInt(positionClass.split("--")[1]) : 0
-		const src = (img as HTMLImageElement).src
-
-		if (src && !photosMap.has(position)) {
-			photosMap.set(position, { src, position })
-		}
+		const position = Number(figure.className.match(/item-photo--(\d+)/)?.[1])
+		if (!img?.src || !position) return
+		photos.push({ src: img.src, position })
 	})
 
-	return Array.from(photosMap.values()).sort((a, b) => a.position - b.position)
+	// dédoublonne par position (au cas où) et trie
+	return [...new Map(photos.map((p) => [p.position, p])).values()].sort((a, b) => a.position - b.position)
 }
