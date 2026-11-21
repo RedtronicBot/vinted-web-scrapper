@@ -7,12 +7,18 @@ export const selectedArticle = new Set<string>()
 
 import { showToast } from "../utils/dom"
 
+export const getCards = () =>
+	[...document.querySelectorAll<HTMLElement>('[data-testid^="product-item-id-"]')].filter((el) => !el.dataset.testid?.includes("--"))
+
+// Brouillon, réservé, vendu...
+export const hasStatus = (card: HTMLElement) => !!card.querySelector('[data-testid$="--status-text"]')
+
 export async function finishSelection() {
-	const cards = [...document.querySelectorAll<HTMLElement>('[data-testid^="product-item-id-"]')].filter((el) => !el.dataset.testid?.includes("--"))
+	const cards = getCards()
 	const existingUrls = await api.getUrls()
 
 	cards.forEach((card) => {
-		if (card.querySelector('[data-testid$="--status-text"]')) return
+		if (hasStatus(card)) return
 		const link = card.querySelector<HTMLAnchorElement>("a")
 		if (link?.href && !existingUrls.includes(link.href)) selectedArticle.add(link.href)
 	})

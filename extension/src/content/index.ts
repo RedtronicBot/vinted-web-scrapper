@@ -1,6 +1,7 @@
 import { deleteOriginalIfPending } from "./delete/deleteOriginal"
 import { matchPendingDraft } from "./draft/matchDraft"
 import { handlePrefill } from "./prefill/prefill"
+import { addPublishedIfPending } from "./publish/afterPublish"
 import { handlePublish } from "./publish/publishDraft"
 import { fetchPhotosFromCarousel } from "./scraping/fetchCaroussel"
 import { fetchCategoryFromPage } from "./scraping/fetchCategory"
@@ -28,5 +29,8 @@ setInterval(() => {
 handlePrefill()
 handlePublish()
 
-if (window.location.pathname.startsWith("/member/")) matchPendingDraft()
+if (window.location.pathname.startsWith("/member/")) {
+	matchPendingDraft()
+	addPublishedIfPending()
+}
 deleteOriginalIfPending()

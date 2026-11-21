@@ -1,5 +1,6 @@
 import { api } from "../api/api"
 import { showToast, waitForElement } from "../utils/dom"
+import type { PendingAdd } from "./afterPublish"
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -22,6 +23,10 @@ export async function handlePublish() {
 
 		const saveBtn = await waitForElement<HTMLElement>('[data-testid="upload-form-save-button"]', 20000)
 		await pause(3000) // laisse le formulaire finir de se charger
+
+		// Noté AVANT le clic : après la publication Vinted redirige et cette page est déchargée
+		const pendingAdd: PendingAdd = { itemId: Number(itemId), draftId: draftIdInUrl, at: Date.now() }
+		await chrome.storage.local.set({ pendingAdd })
 		saveBtn.click()
 
 		await api.setStage(Number(itemId), "PUBLISHED")
