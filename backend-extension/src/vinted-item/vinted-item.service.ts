@@ -94,18 +94,4 @@ export class VintedItemService {
       data: { stage, notifiedAt: null, ...(draftId ? { draftId } : {}) },
     })
   }
-
-  findTodo() {
-    return this.prisma.vintedItem.findMany({
-      where: { stage: { not: "PUBLISHED" }, reuploadAt: { lte: new Date() } },
-      orderBy: { reuploadAt: "asc" },
-      select: {
-        id: true,
-        title: true,
-        stage: true,
-        reuploadAt: true,
-        photos: { orderBy: { position: "asc" }, take: 1, select: { filename: true } },
-      },
-    })
-  }
 }

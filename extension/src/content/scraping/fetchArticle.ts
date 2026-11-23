@@ -30,6 +30,7 @@ export async function fetchArticleDetails(
 	const color = doc.querySelector('[data-testid="item-attributes-color"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
 	const material = doc.querySelector('[data-testid="item-attributes-material"] .details-list__item-value:last-child')?.textContent?.trim() ?? ""
 	const { photos, category: liveCategory } = await chrome.runtime.sendMessage({ type: "SCRAPE_ARTICLE", url })
+	if (!photos?.length) throw new Error("aucune photo récupérée")
 	const category: string[] = liveCategory?.length ? liveCategory : extractCategory(doc)
 	console.log("[Vinted Reupload] catégorie scrapée :", category, liveCategory?.length ? "(onglet)" : "(HTML)")
 	const uploadDateRaw = doc.querySelector('[itemprop="upload_date"] span')?.textContent?.trim() ?? ""

@@ -29,12 +29,6 @@ export class VintedItemController {
     return this.vintedItemService.findAllUrls()
   }
 
-  @Get("todo")
-  @UseGuards(ApiKeyGuard)
-  findTodo() {
-    return this.vintedItemService.findTodo()
-  }
-
   @Patch(":id/stage")
   @UseGuards(ApiKeyGuard)
   setStage(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateStageDto) {
