@@ -40,8 +40,8 @@ export class NotificationsService implements OnModuleInit, OnApplicationBootstra
     }
   }
 
-  // Toutes les heures de 9h à 21h, heure de Paris
-  @Cron("0 9-21 * * *", { timeZone: "Europe/Paris" })
+  // Toutes les 10min de 9h à 10h, heure de Paris
+  @Cron("*/10 9-10 * * *", { timeZone: "Europe/Paris" })
   async notifyDueItems() {
     this.logger.log("Cron notifyDueItems : début")
     try {
@@ -68,8 +68,8 @@ export class NotificationsService implements OnModuleInit, OnApplicationBootstra
     }
   }
 
-  // Tous les jours à 17h : brouillons à publier
-  @Cron("0 17 * * *", { timeZone: "Europe/Paris" })
+  // Toutes les 10min de 17h à 18h, heure de Paris
+  @Cron("*/10 17-18 * * *", { timeZone: "Europe/Paris" })
   async notifyDrafts() {
     this.logger.log("Cron notifyDrafts : début")
     try {
