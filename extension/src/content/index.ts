@@ -1,5 +1,6 @@
 import { deleteOriginalIfPending } from "./delete/deleteOriginal"
 import { matchPendingDraft } from "./draft/matchDraft"
+import { isDraftEditPage, readDraftFromPage } from "./draft/readDraft"
 import { handlePrefill } from "./prefill/prefill"
 import { addPublishedIfPending } from "./publish/afterPublish"
 import { handlePublish } from "./publish/publishDraft"
@@ -10,6 +11,16 @@ import { injectStyles } from "./widget/widget.styles"
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 	if (message.type === "GET_PAGE_DATA") {
+		// Page d'édition d'un brouillon : on lit le formulaire au lieu de la page article
+		if (isDraftEditPage()) {
+			readDraftFromPage()
+				.then(sendResponse)
+				.catch((error) => {
+					console.error("[Vinted Reupload] lecture du brouillon impossible", error)
+					sendResponse(null)
+				})
+			return true
+		}
 		const category = fetchCategoryFromPage()
 		fetchPhotosFromCarousel().then((photos) => sendResponse({ photos, category }))
 		return true

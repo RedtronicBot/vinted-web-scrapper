@@ -16,6 +16,7 @@ export const api = {
 	getItem: (id: number) => request<VintedItem>(`/items/${id}`),
 	getDueItems: () => request<VintedItem[]>("/items/due"),
 	getUrls: () => request<string[]>("/items/urls"),
+	getDraftIds: () => request<string[]>("/items/draft-ids"),
 	saveItem: (item: VintedItemPayload) =>
 		request<VintedItem>("/items", {
 			method: "POST",

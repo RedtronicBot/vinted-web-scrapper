@@ -111,4 +111,12 @@ export class VintedItemService {
     this.logger.log(`Article ${id} passé à ${stage}${draftId ? ` (draftId=${draftId})` : ""}`)
     return item
   }
+
+  async findAllDraftIds(): Promise<string[]> {
+    const items = await this.prisma.vintedItem.findMany({
+      where: { draftId: { not: null } },
+      select: { draftId: true },
+    })
+    return items.map((i) => i.draftId).filter((id): id is string => id !== null)
+  }
 }

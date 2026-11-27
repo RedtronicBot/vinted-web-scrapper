@@ -1,9 +1,21 @@
 import type { VintedItem } from "../../types"
+import type { DraftData } from "../draft/readDraft"
 import { extractCategory } from "./fetchCategory"
 
-export async function fetchArticleDetails(
-	url: string,
-): Promise<Omit<VintedItem, "id" | "createdAt" | "photos"> & { photos: { src: string; position: number }[] }> {
+export type ArticleDetails = Omit<VintedItem, "id" | "createdAt" | "photos"> & { photos: { src: string; position: number }[] }
+
+// Un brouillon, c'est la page d'édition (/items/<id>/edit) : un formulaire, pas une page article
+async function fetchDraftDetails(url: string): Promise<ArticleDetails> {
+	const draft: DraftData | undefined = await chrome.runtime.sendMessage({ type: "SCRAPE_ARTICLE", url })
+	if (!draft?.title) throw new Error("brouillon illisible (page non chargée ou format changé)")
+	console.log("[Vinted Reupload] brouillon scrapé :", draft.title, `(${draft.photos.length} photo(s))`)
+	// Pas de date de republication : sinon il apparaîtrait dans la liste "à republier"
+	return { ...draft, reuploadAt: null, sourceUrl: null, stage: "DRAFT" }
+}
+
+export async function fetchArticleDetails(url: string): Promise<ArticleDetails> {
+	if (/\/items\/\d+\/edit/.test(url)) return fetchDraftDetails(url)
+
 	const response = await fetch(url)
 	const html = await response.text()
 	const parser = new DOMParser()

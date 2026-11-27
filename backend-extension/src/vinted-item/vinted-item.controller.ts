@@ -35,6 +35,12 @@ export class VintedItemController {
     return this.vintedItemService.findAllUrls()
   }
 
+  @Get("draft-ids")
+  @ApiOperation({ summary: "Ids Vinted des brouillons déjà en base" })
+  findAllDraftIds() {
+    return this.vintedItemService.findAllDraftIds()
+  }
+
   @Patch(":id/stage")
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("api-key")

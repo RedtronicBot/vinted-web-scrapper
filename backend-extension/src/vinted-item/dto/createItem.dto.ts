@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { IsArray, IsOptional, IsString } from "class-validator"
+import { IsArray, IsEnum, IsOptional, IsString } from "class-validator"
+import { ItemStage } from "prisma/generated/prisma/enums"
 
 export class CreateItemDto {
   @ApiProperty({ example: "Veste en jean" })
@@ -39,10 +40,20 @@ export class CreateItemDto {
   @IsString({ each: true })
   category: string[]
 
-  @ApiPropertyOptional({ description: "Date ISO de republication", example: "2026-12-01T10:00:00.000Z" })
+  @ApiPropertyOptional({ description: "Date ISO de republication (absente pour un brouillon)", example: "2026-12-01T10:00:00.000Z" })
   @IsOptional()
   @IsString()
   reuploadAt?: string
+
+  @ApiPropertyOptional({ enum: ItemStage, description: "Étape de l'article (PENDING par défaut)" })
+  @IsOptional()
+  @IsEnum(ItemStage)
+  stage?: ItemStage
+
+  @ApiPropertyOptional({ description: "Id du brouillon Vinted (utile pour passer en DRAFT)" })
+  @IsOptional()
+  @IsString()
+  draftId?: string
 }
 
 export class PhotoDto {

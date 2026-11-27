@@ -20,8 +20,8 @@ export interface VintedItem {
 	category: string[]
 	material: string
 	dimensions?: { width: string; length: string } | null
-	reuploadAt: string
-	sourceUrl: string
+	reuploadAt?: string | null
+	sourceUrl?: string | null
 	stage?: "PENDING" | "DRAFT" | "PUBLISHED"
 	draftId?: string | null
 }
